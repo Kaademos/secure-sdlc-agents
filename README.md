@@ -84,7 +84,7 @@ Copy the `.claude/` directory and `CLAUDE.md` into your project root:
 
 ```bash
 # Clone this repo
-git clone https://github.com/YOUR_ORG/secure-sdlc-agents.git
+git clone https://github.com/Kaademos/secure-sdlc-agents.git
 
 # Copy into your project
 cp -r secure-sdlc-agents/.claude /your/project/
