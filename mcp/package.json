@@ -1,0 +1,23 @@
+{
+  "name": "@secure-sdlc/mcp-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server exposing the Secure SDLC agent team to any MCP-compatible AI coding tool",
+  "main": "src/server.js",
+  "bin": {
+    "secure-sdlc-mcp": "src/server.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": ["mcp", "security", "sdlc", "appsec", "compliance", "claude", "cursor"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

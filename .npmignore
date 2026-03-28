@@ -1,0 +1,13 @@
+# Primary control is package.json "files" (allow-list). This file is extra insurance:
+# npm still applies ignore rules when walking directories listed in "files".
+
+**/node_modules
+**/.DS_Store
+*.log
+.env
+.env.*
+*.tgz
+coverage
+.nyc_output
+**/*.test.js
+**/__tests__

@@ -1,0 +1,44 @@
+---
+name: "Secure SDLC: Release Gate"
+command: |
+  # ── Secure SDLC Release Gate ────────────────────────────────────────────────
+  # Runs the full pre-release security checklist.
+  # ALL CRITICAL must be resolved. HIGH must be resolved or have accepted risk.
+
+  echo "🟢 RELEASE PHASE — Security Gate for {{version}}"
+  echo ""
+
+  # CLI gate check (artefact presence + open findings heuristic)
+  if command -v secure-sdlc &> /dev/null; then
+    secure-sdlc gate {{version}}
+    echo ""
+  fi
+
+  # Formal release manager sign-off
+  echo "Release Manager: formal go/no-go decision..."
+  claude --agent release-manager \
+    "Run pre-release security checklist for {{version}}. \
+     Check artefacts in docs/. \
+     Apply severity gates: CRITICAL = block, HIGH without accepted risk = block. \
+     Produce formal go/no-go decision and save to docs/release-security-sign-off.md."
+
+  echo ""
+
+  # GRC compliance attestation
+  echo "GRC Analyst: compliance attestation..."
+  claude --agent grc-analyst \
+    "Produce compliance attestation for {{version}}. \
+     Reference docs/risk-register.md and all phase artefacts. \
+     Save to docs/audit-evidence/compliance-attestation-{{version}}.md."
+
+  echo ""
+  echo "Release gate complete. Check docs/release-security-sign-off.md for the decision."
+tags:
+  - security
+  - sdlc
+  - release
+  - gate
+arguments:
+  - name: version
+    description: "Release version (e.g. 'v1.2.0')"
+    default_value: "v1.0.0"

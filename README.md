@@ -1,17 +1,339 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-Sub--Agents-blueviolet)
+![Cursor MCP](https://img.shields.io/badge/Cursor-MCP%20Ready-blue)
 ![OWASP ASVS](https://img.shields.io/badge/OWASP-ASVS%20L2-orange)
-![PRs Welcome](https://img.shields.io/shields.io/badge/PRs-welcome-brightgreen.svg)
+![Works With](https://img.shields.io/badge/Works%20With-Claude%20%7C%20Cursor%20%7C%20Windsurf%20%7C%20Warp-brightgreen)
 
-# Secure SDLC Agents for Claude Code
+# Secure SDLC Agents
 
-A team of specialised Claude Code sub-agents that enforce security at every phase of the
-Software Development Lifecycle — from requirements through to release.
+A team of AI security specialists — embedded directly in your vibe coding workflow.
 
-Inspired by the multi-agent Claude Code pattern popularised by Garry Tan, but purpose-built
-for security engineering teams. Where that setup gives you a CEO, Eng Manager and QA
-Engineer, this gives you an AppSec Engineer, Product Manager (with ASVS), GRC Analyst,
-Cloud/Platform Engineer, Dev Lead and Release Manager — all wired into a full Secure SDLC.
+They cover every phase of the Software Development Lifecycle: requirements, architecture,
+code review, infrastructure, compliance, and release gating. They work wherever you work:
+Claude Code, Cursor, Windsurf, Warp, and any tool that supports MCP.
+
+---
+
+## The problem this solves
+
+When developers use AI tools to build fast, security becomes the thing that gets bolted on
+at the end — or skipped entirely. Threat models don't happen. ASVS requirements are never
+written. Compliance evidence is scrambled together the night before an audit.
+
+This project makes the security team part of the build process from day one. Not a gate
+at the end, but a set of specialists you summon at the exact moment their expertise is needed.
+
+---
+
+## What you get
+
+| What | Why it matters |
+|---|---|
+| **8 specialist agents** | AppSec, Product Manager, GRC Analyst, Cloud/Platform, Dev Lead, Release Manager, Security Champion, AI Security Engineer |
+| **MCP server** | Works in Cursor, Windsurf, Zed, Continue, and any MCP-compatible tool |
+| **CLI tool** (`secure-sdlc`) | Zero-friction setup, kickoff wizard, status dashboard, release gate |
+| **Cursor rules** | Automatic security context in every Cursor session |
+| **GitHub Actions workflow** | Artefact gate, secret scan, SAST (CodeQL), IaC scan (Checkov), dependency audit |
+| **Git hooks** | Pre-commit secret detection, security anti-pattern checks |
+| **Warp workflows** | Pre-built Warp automation for every SDLC phase |
+| **Stack profiles** | Deep, framework-specific guidance for Next.js, FastAPI, Django, Express, Rails |
+| **Document templates** | 8 fully structured templates for every phase artefact |
+| **Worked examples** | 3 complete feature walkthroughs (auth, REST API, file upload) |
+
+---
+
+## Agents
+
+| Agent | Role | When to invoke |
+|---|---|---|
+| [`product-manager`](.claude/agents/product-manager.md) | ASVS-mapped security requirements | Start of every feature |
+| [`appsec-engineer`](.claude/agents/appsec-engineer.md) | Threat modelling, SAST/DAST, vuln triage | Design, Build, Test |
+| [`grc-analyst`](.claude/agents/grc-analyst.md) | Compliance mapping, risk register, audit evidence | Plan through Release |
+| [`cloud-platform-engineer`](.claude/agents/cloud-platform-engineer.md) | IaC security, CSPM, secrets, hardening | Design, Build, Release |
+| [`dev-lead`](.claude/agents/dev-lead.md) | Secure coding, PR review, SCA | Every PR |
+| [`release-manager`](.claude/agents/release-manager.md) | Security sign-off, go/no-go gate | Pre-release |
+| [`security-champion`](.claude/agents/security-champion.md) | First-line security Q&A and lightweight review | Any time, any phase |
+| [`ai-security-engineer`](.claude/agents/ai-security-engineer.md) | Prompt injection, agentic risks, LLM supply chain | Any feature using AI/LLMs |
+
+---
+
+## Quick start
+
+### Option A — Claude Code (zero dependencies)
+
+```bash
+git clone https://github.com/Kaademos/secure-sdlc-agents.git
+cp -r secure-sdlc-agents/.claude /your/project/
+cp secure-sdlc-agents/CLAUDE.md /your/project/
+cp -r secure-sdlc-agents/docs/templates /your/project/docs/
+```
+
+Then use agents directly:
+
+```bash
+cd /your/project
+claude --agent product-manager "Define security requirements for [your feature]"
+```
+
+### Option B — CLI tool (recommended for teams)
+
+Published on npm as **`@kaademos/secure-sdlc`**. Requires **Node.js 18+**.
+
+**Global install** (command is still `secure-sdlc`):
+
+```bash
+npm install -g @kaademos/secure-sdlc
+secure-sdlc --version
+secure-sdlc init
+```
+
+**No global install** (uses npx; pin a version in CI with `@1.0.0`):
+
+```bash
+npx @kaademos/secure-sdlc@latest init
+```
+
+**After install — useful commands:**
+
+```bash
+secure-sdlc paths              # print PACKAGE_ROOT and MCP server path (for Cursor MCP JSON)
+secure-sdlc init --cursor      # scaffold project + .cursor/mcp.json pointing at bundled MCP
+secure-sdlc install-mcp        # merge MCP server into ~/.cursor/mcp.json (and other tools)
+secure-sdlc kickoff            # interactive feature wizard
+secure-sdlc status
+```
+
+**Develop / run from a git clone** (no npm publish needed):
+
+```bash
+cd /path/to/secure-sdlc-agents
+npm install
+node cli/bin/secure-sdlc.js init
+# or: npm run sdlc -- init
+```
+
+### Option C — Cursor / Windsurf / Other MCP tools
+
+1. Get the absolute path to `mcp/src/server.js`:
+
+- **If you installed the CLI from npm:** run `secure-sdlc paths` and copy `MCP_SERVER`.
+- **If you use a git clone:** run `npm install` at the repo root (installs MCP SDK for the bundled server), then use  
+  `/absolute/path/to/secure-sdlc-agents/mcp/src/server.js`.
+
+2. Add to your MCP config:
+
+**Cursor** (`~/.cursor/mcp.json` or `.cursor/mcp.json` in project):
+```json
+{
+  "mcpServers": {
+    "secure-sdlc": {
+      "command": "node",
+      "args": ["/absolute/path/from-secure-sdlc-paths/mcp/src/server.js"]
+    }
+  }
+}
+```
+
+**Claude Code:**
+```bash
+claude mcp add secure-sdlc -- node /absolute/path/to/secure-sdlc-agents/mcp/src/server.js
+```
+
+**Or install for all tools at once:**
+```bash
+node cli/bin/secure-sdlc.js install-mcp --tool all
+```
+
+3. Copy the Cursor rules for automatic security context:
+```bash
+cp -r .cursor /your/project/
+```
+
+4. Use the `sdlc_*` tools in any chat:
+```
+Use sdlc_plan_feature to define security requirements for a new payment checkout feature.
+Stack is Next.js + Stripe + PostgreSQL. ASVS L2. Compliance: PCI-DSS, SOC2.
+```
+
+---
+
+## The lifecycle — phase by phase
+
+```
+PLAN        product-manager (ASVS requirements)
+            + grc-analyst (risk register, compliance mapping)
+                    ↓
+DESIGN      appsec-engineer (STRIDE threat model)
+            + cloud-platform-engineer (IaC review)
+            + ai-security-engineer (if AI/LLM features)
+            + grc-analyst (compliance gate)
+                    ↓
+BUILD       dev-lead (PR review, SCA) — on every PR
+            + appsec-engineer (SAST triage)
+            + cloud-platform-engineer (secrets, pipeline)
+            + security-champion (quick questions any time)
+                    ↓
+TEST        appsec-engineer (DAST, pentest)
+            + dev-lead (regression)
+            + grc-analyst (audit evidence collection)
+                    ↓
+RELEASE     release-manager (go/no-go)
+            + grc-analyst (compliance attestation)
+            + cloud-platform-engineer (production hardening)
+```
+
+**Severity gates:**
+- **CRITICAL** — blocks all gates, no exceptions
+- **HIGH** — blocks Build→Test and Test→Release without documented accepted risk
+- **MEDIUM** — requires remediation plan or accepted risk before release
+- **LOW** — tracked in risk register, does not block
+
+---
+
+## MCP tools reference
+
+When using the MCP server (Cursor, Windsurf, etc.), these tools are available:
+
+| Tool | What it does |
+|---|---|
+| `sdlc_plan_feature` | ASVS requirements + risk register for a new feature |
+| `sdlc_threat_model` | STRIDE (+ LINDDUN) threat model |
+| `sdlc_review_pr` | Security review a PR — dev-lead + appsec-engineer |
+| `sdlc_review_infra` | IaC security review (Terraform, Helm, K8s, etc.) |
+| `sdlc_triage_sast` | Triage SAST findings from any tool |
+| `sdlc_release_gate` | Pre-release go/no-go security gate |
+| `sdlc_check_compliance` | Map controls to SOC 2, ISO 27001, GDPR, PCI DSS, etc. |
+| `sdlc_init_project` | Scaffold Secure SDLC structure in a project |
+| `sdlc_security_champion` | Quick security Q&A and lightweight code review |
+| `sdlc_ai_security_review` | Security review for AI/LLM features |
+
+---
+
+## CLI commands reference
+
+```bash
+secure-sdlc init           # Scaffold docs, hooks, CI, config in current project
+secure-sdlc init --cursor  # Also install Cursor MCP config and rules
+secure-sdlc kickoff        # Interactive wizard to start a new feature
+secure-sdlc status         # Show current SDLC phase and artefact status
+secure-sdlc review         # Security review a file or diff
+secure-sdlc gate v1.2.0    # Run pre-release security gate check
+secure-sdlc install-mcp    # Install MCP server for Cursor / Claude Code / Windsurf
+secure-sdlc paths          # Show package root + MCP path (after npm install -g)
+```
+
+---
+
+## Git hooks
+
+Included in `hooks/`:
+
+- **`pre-commit`** — secret detection, lock file checks, security anti-pattern scan
+- **`pre-push`** — artefact gate for protected branches, open finding check
+
+Install:
+```bash
+bash /path/to/secure-sdlc-agents/hooks/install.sh
+# OR via CLI:
+secure-sdlc init  # installs hooks automatically
+```
+
+---
+
+## GitHub Actions
+
+`.github/workflows/secure-sdlc-gate.yml` adds:
+
+- **Artefact gate** — blocks PRs to main/master if required security docs are missing
+- **Secret scanning** (Gitleaks)
+- **Dependency audit** (npm audit, pip-audit)
+- **IaC scanning** (Checkov — Terraform, K8s, Docker)
+- **SAST** (CodeQL — JavaScript/TypeScript, Python)
+- **Release gate** — full pre-release checklist on `workflow_dispatch`
+
+Copy to your project:
+```bash
+mkdir -p .github/workflows
+cp /path/to/secure-sdlc-agents/.github/workflows/secure-sdlc-gate.yml .github/workflows/
+```
+
+---
+
+## Stack profiles
+
+Deep, framework-specific security guidance in `stacks/`:
+
+| Stack | Profile |
+|---|---|
+| Next.js | [`stacks/nextjs.md`](stacks/nextjs.md) — Server Actions, API routes, CSP, CORS |
+| FastAPI | [`stacks/fastapi.md`](stacks/fastapi.md) — Depends() auth, Pydantic, CORS, rate limiting |
+| Django | [`stacks/django.md`](stacks/django.md) — CSRF, strong params, ORM injection, production settings |
+| Express.js | [`stacks/express.md`](stacks/express.md) — helmet, rate limiting, CSRF, Zod validation |
+| Ruby on Rails | [`stacks/rails.md`](stacks/rails.md) — Brakeman, Pundit, strong parameters, credentials |
+
+---
+
+## Warp terminal workflows
+
+In `warp-workflows/` — import into Warp for one-click SDLC automation:
+
+| Workflow | Trigger |
+|---|---|
+| Feature Kickoff | Start a new feature with requirements + risk register |
+| PR Security Review | dev-lead + appsec review on a PR |
+| Threat Model | STRIDE threat model on an architecture |
+| Release Gate | Full pre-release security gate |
+| SDLC Status | Check which phases are complete |
+
+---
+
+## Document templates
+
+`docs/templates/` contains pre-formatted templates for every artefact:
+
+| Template | Produced by | Phase |
+|---|---|---|
+| `security-requirements.md` | product-manager | Plan |
+| `risk-register.md` | grc-analyst | Plan → ongoing |
+| `threat-model.md` | appsec-engineer | Design |
+| `infra-security-review.md` | cloud-platform-engineer | Design |
+| `sast-findings.md` | appsec-engineer + dev-lead | Build |
+| `test-security-report.md` | appsec-engineer | Test |
+| `release-sign-off.md` | release-manager | Release |
+| `compliance-attestation.md` | grc-analyst | Release |
+
+---
+
+## Worked examples
+
+| Example | Feature type | Key security lessons |
+|---|---|---|
+| [`01-login-feature/`](examples/01-login-feature/) | Auth flow (bcrypt, MFA, sessions) | JWT alg:none, hardcoded secrets, cost factor |
+| [`02-api-endpoint/`](examples/02-api-endpoint/) | Public REST API | IDOR via UUID path param, IAM over-privilege |
+| [`03-file-upload/`](examples/03-file-upload/) | File upload to S3 | SVG XSS, magic byte validation, public bucket |
+
+---
+
+## Project configuration
+
+Create `secure-sdlc.yaml` in your project root:
+
+```yaml
+project:
+  name: "my-app"
+  stack: "Next.js + PostgreSQL"
+
+security:
+  asvs_level: L2
+  frameworks: [SOC2, GDPR]
+  gates:
+    build_to_test:
+      block_on: [CRITICAL, HIGH]
+    test_to_release:
+      block_on: [CRITICAL, HIGH]
+```
+
+Generate one automatically: `secure-sdlc init`
 
 ---
 
@@ -23,207 +345,36 @@ They will help a team ask the right questions earlier, produce consistent artefa
 and catch common mistakes that would otherwise slip through. They will not replace a
 skilled AppSec engineer, a qualified GRC practitioner, or a thorough penetration test.
 
-Every output the agents produce should be reviewed by a human with relevant expertise
-before it is acted on or used as audit evidence. The threat model is a starting point for
-a conversation, not a final document. The SAST triage is informed opinion, not a verdict.
-The compliance attestation is only as good as the evidence it references.
+Every output should be reviewed by a human with relevant expertise before it is acted on
+or used as audit evidence. The threat model is a starting point, not a final document.
 
-Security practitioners are rightly sceptical of anything that claims to automate security
-away. This project does not make that claim. It makes security practices easier to start,
-easier to maintain, and harder to skip — which is most of the battle in most teams.
+Security practitioners are right to be sceptical of anything that claims to automate
+security away. This project does not make that claim. It makes security practices easier
+to start, easier to maintain, and harder to skip — which is most of the battle.
 
-If you find guidance in an agent file that is wrong or dangerously out of date, please
-[open an issue](../../issues/new?template=guidance-correction.md). That kind of correction
-is the most valuable contribution this project can receive.
-
----
-
-## Why this exists
-
-Security is consistently bolted on at the end of development cycles. Threat models happen
-too late (if at all). ASVS requirements are never written. Compliance evidence is scrambled
-together before audits. This project encodes the right behaviours into the agents that sit
-alongside your developers every day.
-
-**What you get:**
-- Security requirements gathered via OWASP ASVS *before* design starts
-- Structured threat modelling (STRIDE/LINDDUN) at architecture review
-- SAST triage with developer-friendly remediation, not just CVE dumps
-- GRC control mapping to SOC 2, ISO 27001, NIST CSF, PCI DSS and GDPR
-- IaC and CSPM-style review for your cloud and platform configurations
-- A hard go/no-go release gate backed by documented evidence
-
----
-
-## Agents
-
-| Agent | Role | Key phases |
-|---|---|---|
-| [`product-manager`](.claude/agents/product-manager.md) | ASVS-mapped secure requirements | Plan |
-| [`appsec-engineer`](.claude/agents/appsec-engineer.md) | Threat modelling, SAST/DAST, vuln triage | Design, Build, Test |
-| [`grc-analyst`](.claude/agents/grc-analyst.md) | Compliance mapping, risk register, audit evidence | Plan → Release |
-| [`cloud-platform-engineer`](.claude/agents/cloud-platform-engineer.md) | IaC security, CSPM, secrets, hardening | Design, Build, Release |
-| [`dev-lead`](.claude/agents/dev-lead.md) | Secure coding, PR review, SCA | Build, Test |
-| [`release-manager`](.claude/agents/release-manager.md) | Security sign-off, go/no-go gate | Release |
+If you find guidance in an agent file that is wrong or dangerously out of date,
+please [open an issue](.github/ISSUE_TEMPLATE/guidance-correction.md).
 
 ---
 
 ## Prerequisites
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed
-- A Claude account with access to Claude Code
-- Familiarity with the Claude Code sub-agents feature
-
----
-
-## Quick start
-
-### 1. Add the agents to your project
-
-Copy the `.claude/` directory and `CLAUDE.md` into your project root:
-
-```bash
-# Clone this repo
-git clone https://github.com/Kaademos/secure-sdlc-agents.git
-
-# Copy into your project
-cp -r secure-sdlc-agents/.claude /your/project/
-cp secure-sdlc-agents/CLAUDE.md /your/project/
-```
-
-Or use it as a reference and adapt the agent files to your stack and standards.
-
-### 2. Initialise your docs directory
-
-Copy the document templates for the current feature or sprint:
-
-```bash
-mkdir -p docs/audit-evidence
-cp secure-sdlc-agents/docs/templates/* docs/
-```
-
-### 3. Start with secure requirements (Plan phase)
-
-```bash
-cd /your/project
-claude --agent product-manager \
-  "Define security requirements for our new user authentication feature using ASVS L2"
-```
-
-### 4. Run a threat model (Design phase)
-
-```bash
-claude --agent appsec-engineer \
-  "Threat model the proposed authentication architecture in docs/architecture.md using STRIDE"
-```
-
-### 5. Review a pull request (Build phase)
-
-```bash
-claude --agent dev-lead "Review PR #42 for secure coding issues and dependency risks"
-claude --agent appsec-engineer "Triage any SAST findings for PR #42"
-```
-
-### 6. Release gate (Release phase)
-
-```bash
-claude --agent release-manager "Run pre-release security checklist for v1.2.0"
-```
-
----
-
-## The lifecycle
-
-```
-PLAN        → product-manager (ASVS requirements) + grc-analyst (risk register)
-                    ↓
-DESIGN      → appsec-engineer (threat model) + cloud-platform-engineer (IaC review)
-             + grc-analyst (compliance gate)
-                    ↓
-BUILD       → dev-lead (PR review, SCA) + appsec-engineer (SAST triage)
-             + cloud-platform-engineer (secrets, pipeline)
-                    ↓
-TEST        → appsec-engineer (DAST, pentest) + dev-lead (regression)
-             + grc-analyst (evidence collection)
-                    ↓
-RELEASE     → release-manager (go/no-go) + grc-analyst (attestation)
-             + cloud-platform-engineer (production hardening)
-```
-
-Severity gates block progression:
-- **CRITICAL or HIGH** unmitigated findings block Build→Test and Test→Release
-- **MEDIUM** findings require accepted risk or remediation plan before release
-- **LOW** findings are tracked in the risk register
-
----
-
-## Document templates
-
-Pre-formatted templates for every artefact the agents produce are in [`docs/templates/`](docs/templates/).
-Copy them into your `docs/` folder at the start of each feature or release.
-
-| Template | Produced by | Phase |
-|---|---|---|
-| [`security-requirements.md`](docs/templates/security-requirements.md) | product-manager | Plan |
-| [`risk-register.md`](docs/templates/risk-register.md) | grc-analyst | Plan → ongoing |
-| [`threat-model.md`](docs/templates/threat-model.md) | appsec-engineer | Design |
-| [`infra-security-review.md`](docs/templates/infra-security-review.md) | cloud-platform-engineer | Design |
-| [`sast-findings.md`](docs/templates/sast-findings.md) | appsec-engineer + dev-lead | Build |
-| [`test-security-report.md`](docs/templates/test-security-report.md) | appsec-engineer | Test |
-| [`release-sign-off.md`](docs/templates/release-sign-off.md) | release-manager | Release |
-| [`compliance-attestation.md`](docs/templates/compliance-attestation.md) | grc-analyst | Release |
-
-All 8 templates are fully populated and immediately usable.
-
----
-
-## Examples
-
-See [`examples/`](examples/) for complete worked walkthroughs showing the full agent
-collaboration for real feature types:
-
-- [01 — Login feature](examples/01-login-feature/): Greenfield auth flow, ASVS L2
-- [02 — REST API endpoint](examples/02-api-endpoint/): Public endpoint with IDOR risk and rate limiting
-- [03 — File upload](examples/03-file-upload/): File handling, SVG XSS, malware scanning, S3 hardening
-
----
-
-## Adapting to your stack
-
-The agents are intentionally framework-agnostic. Common customisations:
-
-**Change the ASVS level** — edit the product-manager agent's default level from L2 to L1 or L3.
-
-**Add your compliance frameworks** — the grc-analyst agent lists SOC 2, ISO 27001, NIST CSF,
-PCI DSS and GDPR by default. Remove irrelevant ones and add any framework specific to your
-industry (HIPAA, DORA, FedRAMP, etc.).
-
-**Add your toolchain** — reference your specific SAST tool (Semgrep, Checkmarx, Snyk Code),
-DAST tool (OWASP ZAP, Burp Suite) and IaC scanner (Checkov, tfsec, Trivy) in the relevant
-agent files so the agents produce output in your tool's format.
-
-**Add a security champion agent** — for larger engineering orgs, consider a
-`security-champion` agent that sits between dev-lead and appsec-engineer, handling first-line
-security triage within squads.
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) for sub-agent usage
+- Node.js 18+ for the CLI and MCP server
+- Optional: `npm install -g @kaademos/secure-sdlc` for the `secure-sdlc` command on your PATH
+- Any MCP-compatible AI tool for the `sdlc_*` tools
 
 ---
 
 ## Contributing
 
-Contributions are very welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md). High-value contributions:
 
-Ideas for contributions:
-- Additional compliance frameworks (HIPAA, FedRAMP, DORA)
-- Language/framework-specific secure coding guidance in the dev-lead agent
-- More worked examples (OAuth flows, payment processing, microservices)
-- Integration guidance for specific SAST/DAST tools
-- Translations of the agent prompts
-
----
-
-## Licence
-
-MIT — see [LICENSE](LICENSE).
+- Additional compliance frameworks (HIPAA, FedRAMP, NIS2)
+- Stack profiles for Go (Gin/Echo), .NET, Java Spring Boot
+- More worked examples (OAuth flows, payment processing, AI features)
+- Integration guides for specific SAST/DAST tools
+- Translations of agent prompts
 
 ---
 
@@ -231,5 +382,13 @@ MIT — see [LICENSE](LICENSE).
 
 - [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [NIST Secure Software Development Framework (SSDF)](https://csrc.nist.gov/projects/ssdf)
+- [OWASP Top 10 for LLMs 2025](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+- [NIST SSDF](https://csrc.nist.gov/projects/ssdf)
+- [Model Context Protocol](https://modelcontextprotocol.io)
 - [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
+
+---
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).

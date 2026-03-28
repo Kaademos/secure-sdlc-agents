@@ -1,0 +1,48 @@
+---
+name: "Secure SDLC: Check Status"
+command: |
+  # ── Secure SDLC Status Check ───────────────────────────────────────────────
+  # Shows which phases are complete and what's next.
+
+  if command -v secure-sdlc &> /dev/null; then
+    secure-sdlc status
+  else
+    echo "Checking SDLC artefacts manually..."
+    echo ""
+
+    check() {
+      if [ -f "$1" ]; then
+        echo "  ✓ $1"
+      else
+        echo "  ○ $1 (missing)"
+      fi
+    }
+
+    echo "PLAN:"
+    check "docs/security-requirements.md"
+    check "docs/risk-register.md"
+
+    echo ""
+    echo "DESIGN:"
+    check "docs/threat-model.md"
+    check "docs/infra-security-review.md"
+
+    echo ""
+    echo "BUILD:"
+    check "docs/sast-findings.md"
+
+    echo ""
+    echo "TEST:"
+    check "docs/test-security-report.md"
+
+    echo ""
+    echo "RELEASE:"
+    check "docs/release-security-sign-off.md"
+
+    echo ""
+    echo "Install the CLI for richer output: npm install -g secure-sdlc"
+  fi
+tags:
+  - security
+  - sdlc
+  - status

@@ -5,6 +5,22 @@ accurate, more useful, or applicable to more teams are very welcome.
 
 ---
 
+## Development setup (CLI + MCP)
+
+The **npm package** is defined at the **repository root** (`package.json`), not under `cli/`.
+
+```bash
+git clone https://github.com/Kaademos/secure-sdlc-agents.git
+cd secure-sdlc-agents
+npm install                 # installs CLI + MCP SDK dependencies
+npm run sdlc -- --version   # should print the version from package.json
+npm run sdlc -- paths       # shows resolved paths on your machine
+```
+
+Do not commit `node_modules/`, `cli/node_modules/`, or `mcp/node_modules/`. The nested `mcp/package.json` is **private** and is not published separately; the published tarball includes only `mcp/src` and `mcp/package.json`.
+
+---
+
 ## What makes a good contribution
 
 **High value:**
@@ -67,6 +83,6 @@ do it better. Disagreements about security guidance should be constructive and e
 
 ## Reporting security issues in this project
 
-This repository contains documentation and prompt files — there is no executable code.
+This repository contains documentation, prompt files, and Node.js tooling (CLI + MCP).
 If you find guidance in the agent files that is actively harmful or dangerously wrong,
 please open an issue rather than a pull request so it can be reviewed quickly.

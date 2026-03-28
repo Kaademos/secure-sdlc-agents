@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# Secure SDLC — Pre-Push Hook
+#
+# Runs before pushing to remote. Heavier checks than pre-commit:
+#   1. Full secret scan on all changed commits (not just staged)
+#   2. Security artefact gate for pushes to protected branches
+#   3. Nudge to run SAST if pushing to main/master
+#
+# To bypass in emergencies: git push --no-verify
+
+set -euo pipefail
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+print_header() {
+  echo -e "\n${BLUE}${BOLD}[Secure SDLC]${NC} $1"
+}
+
+print_pass() { echo -e "  ${GREEN}✓${NC} $1"; }
+print_warn() { echo -e "  ${YELLOW}⚠${NC}  $1"; }
+print_fail() { echo -e "  ${RED}✗${NC} $1"; }
+
+# Read the push destination
+while read local_ref local_sha remote_ref remote_sha; do
+  REMOTE_BRANCH="${remote_ref##refs/heads/}"
+  LOCAL_BRANCH="${local_ref##refs/heads/}"
+  
+  # Determine if pushing to a protected branch
+  PROTECTED=false
+  if [[ "$REMOTE_BRANCH" =~ ^(main|master|develop|staging|release/.*)$ ]]; then
+    PROTECTED=true
+  fi
+  
+  # ──────────────────────────────────────────────────────────────
+  # 1. SECURITY ARTEFACT CHECK (protected branches only)
+  # ──────────────────────────────────────────────────────────────
+  if [ "$PROTECTED" = true ]; then
+    print_header "Security Artefact Gate (push to $REMOTE_BRANCH)"
+    
+    MISSING=()
+    WARNINGS=()
+    
+    # Plan artefacts — required for any push to protected branches
+    for f in "docs/security-requirements.md" "docs/risk-register.md"; do
+      if [ ! -f "$f" ]; then
+        WARNINGS+=("$f")
+      else
+        print_pass "$f"
+      fi
+    done
+    
+    # Stricter check for main/master
+    if [[ "$REMOTE_BRANCH" =~ ^(main|master)$ ]]; then
+      for f in "docs/threat-model.md" "docs/sast-findings.md"; do
+        if [ ! -f "$f" ]; then
+          MISSING+=("$f")
+        else
+          print_pass "$f"
+        fi
+      done
+    fi
+    
+    if [ ${#MISSING[@]} -gt 0 ]; then
+      echo ""
+      print_fail "Missing required security artefacts for push to $REMOTE_BRANCH:"
+      for m in "${MISSING[@]}"; do
+        echo "      ✗ $m"
+      done
+      echo ""
+      echo -e "  Generate them:"
+      echo -e "  ${YELLOW}secure-sdlc kickoff${NC}  — interactive wizard"
+      echo -e "  ${YELLOW}claude --agent product-manager 'Define security requirements for ...'${NC}"
+      echo ""
+      exit 1
+    fi
+    
+    if [ ${#WARNINGS[@]} -gt 0 ]; then
+      for w in "${WARNINGS[@]}"; do
+        print_warn "$w is missing — run 'secure-sdlc kickoff' to generate it"
+      done
+    fi
+  fi
+
+  # ──────────────────────────────────────────────────────────────
+  # 2. CHECK FOR UNRESOLVED CRITICAL/HIGH FINDINGS
+  # ──────────────────────────────────────────────────────────────
+  if [ "$PROTECTED" = true ]; then
+    print_header "Open Finding Check"
+    
+    OPEN_CRITICALS=0
+    
+    for doc in "docs/sast-findings.md" "docs/test-security-report.md"; do
+      if [ -f "$doc" ]; then
+        COUNT=$(grep -icE 'CRITICAL' "$doc" 2>/dev/null | tr -d ' ' || echo "0")
+        RESOLVED=$(grep -icE 'resolved|mitigated|false positive|closed' "$doc" 2>/dev/null | tr -d ' ' || echo "0")
+        UNRESOLVED=$(( COUNT - RESOLVED ))
+        
+        if [ "$UNRESOLVED" -gt 0 ]; then
+          OPEN_CRITICALS=$((OPEN_CRITICALS + UNRESOLVED))
+          print_warn "Possible open CRITICAL findings in $doc — verify status"
+        else
+          print_pass "$doc — no obvious open CRITICAL findings"
+        fi
+      fi
+    done
+  fi
+
+  # ──────────────────────────────────────────────────────────────
+  # 3. SAST NUDGE (main/master pushes)
+  # ──────────────────────────────────────────────────────────────
+  if [[ "$REMOTE_BRANCH" =~ ^(main|master)$ ]]; then
+    print_header "Pre-Push Security Reminder"
+    echo -e "  You are pushing to ${BOLD}$REMOTE_BRANCH${NC}. Consider running:\n"
+    echo -e "  ${YELLOW}claude --agent dev-lead 'Review recent commits for security issues'${NC}"
+    echo -e "  ${YELLOW}claude --agent appsec-engineer 'Triage any SAST findings'${NC}"
+    echo -e "  ${YELLOW}secure-sdlc status${NC}  — check which SDLC phases are complete"
+    echo ""
+  fi
+done
+
+echo -e "${GREEN}${BOLD}[Secure SDLC] Pre-push checks passed.${NC}\n"
+exit 0
