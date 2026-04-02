@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+# Secure SDLC — Pre-Commit Hook
+#
+# Runs lightweight security checks before every commit:
+#   1. Secret pattern detection (blocks on high-confidence patterns)
+#   2. Dependency lock file consistency check
+#   3. Presence check for security artefacts on first commit to protected branches
+#
+# To bypass in emergencies (document the reason): git commit --no-verify
+
+set -euo pipefail
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+BOLD='\033[1m'
+
+print_header() {
+  echo -e "\n${BLUE}${BOLD}[Secure SDLC]${NC} $1"
+}
+
+print_pass() {
+  echo -e "  ${GREEN}✓${NC} $1"
+}
+
+print_warn() {
+  echo -e "  ${YELLOW}⚠${NC}  $1"
+}
+
+print_fail() {
+  echo -e "  ${RED}✗${NC} $1"
+}
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
+BLOCKERS=0
+
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+# ──────────────────────────────────────────────────────────────────
+# 1. SECRET DETECTION
+# Pattern-based scan on staged changes.
+# High-confidence patterns = block commit.
+# Medium-confidence patterns = warn.
+# ──────────────────────────────────────────────────────────────────
+print_header "Secret Detection"
+
+STAGED_DIFF=$(git diff --cached 2>/dev/null || true)
+
+# High-confidence patterns — block on match
+HIGH_PATTERNS=(
+  # AWS credentials
+  'AKIA[0-9A-Z]{16}'
+  'aws_secret_access_key\s*=\s*["\x27][A-Za-z0-9/+=]{40}["\x27]'
+  # Generic API key assignments with long values
+  '(api_key|apikey|api_secret|client_secret|access_token)\s*[:=]\s*["\x27][A-Za-z0-9_\-]{32,}["\x27]'
+  # Private keys
+  '-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY'
+  # GitHub tokens
+  'ghp_[A-Za-z0-9]{36}'
+  'github_pat_[A-Za-z0-9_]{82}'
+  # Stripe live keys
+  'sk_live_[A-Za-z0-9]{24,}'
+  # Twilio
+  'SK[a-z0-9]{32}'
+  # Hardcoded connection strings with credentials
+  '(mysql|postgresql|mongodb|redis):\/\/[^:@\s]+:[^@\s]+@'
+)
+
+# Medium-confidence patterns — warn only
+MEDIUM_PATTERNS=(
+  'password\s*=\s*["\x27][^"\x27]{8,}["\x27]'
+  'passwd\s*=\s*["\x27][^"\x27]{8,}["\x27]'
+  'secret\s*=\s*["\x27][^"\x27]{8,}["\x27]'
+  'token\s*=\s*["\x27][^"\x27]{20,}["\x27]'
+  'Authorization:\s*Bearer\s+[A-Za-z0-9._\-]+'
+)
+
+SECRET_FOUND=0
+
+for pattern in "${HIGH_PATTERNS[@]}"; do
+  if echo "$STAGED_DIFF" | grep -qE "$pattern" 2>/dev/null; then
+    MATCH=$(echo "$STAGED_DIFF" | grep -E "$pattern" | head -1)
+    print_fail "CRITICAL SECRET DETECTED — pattern: ${pattern:0:40}..."
+    echo -e "      ${RED}Match context: ${MATCH:0:120}${NC}"
+    echo ""
+    SECRET_FOUND=1
+    BLOCKERS=$((BLOCKERS + 1))
+  fi
+done
+
+for pattern in "${MEDIUM_PATTERNS[@]}"; do
+  if echo "$STAGED_DIFF" | grep -qE "$pattern" 2>/dev/null; then
+    MATCH=$(echo "$STAGED_DIFF" | grep -E "$pattern" | head -1)
+    # Skip if it's clearly a test/example file
+    if echo "$STAGED_DIFF" | grep -B5 -A5 "$pattern" | grep -qiE "(test|spec|example|fixture|mock|fake|dummy)"; then
+      print_warn "Possible secret in test/example file — verify this is not a real credential"
+    else
+      print_warn "Possible secret detected — verify this is not a real credential"
+      echo "         Pattern: ${pattern:0:60}"
+      BLOCKERS=$((BLOCKERS + 1))
+    fi
+  fi
+done
+
+if [ $SECRET_FOUND -eq 0 ] && [ $BLOCKERS -eq 0 ]; then
+  print_pass "No secrets detected"
+fi
+
+# ──────────────────────────────────────────────────────────────────
+# 2. LOCK FILE CONSISTENCY
+# If package.json changed, package-lock.json / yarn.lock should too.
+# ──────────────────────────────────────────────────────────────────
+print_header "Dependency Lock File Check"
+
+if echo "$STAGED_FILES" | grep -q "^package\.json$"; then
+  if ! echo "$STAGED_FILES" | grep -qE "^(package-lock\.json|yarn\.lock|pnpm-lock\.yaml)$"; then
+    print_warn "package.json changed but no lock file updated"
+    print_warn "Run: npm install (or yarn/pnpm install) and stage the lock file"
+    # This is a warning, not a block, as the workflow might intentionally not commit lock files
+  else
+    print_pass "Lock file updated with package.json"
+  fi
+elif echo "$STAGED_FILES" | grep -qE "^(package-lock\.json|yarn\.lock|pnpm-lock\.yaml)$"; then
+  if ! echo "$STAGED_FILES" | grep -q "^package\.json$"; then
+    print_pass "Lock file update (no package.json change — likely npm install/upgrade)"
+  fi
+else
+  print_pass "No package manifest changes"
+fi
+
+if echo "$STAGED_FILES" | grep -q "requirements.*\.txt\|pyproject\.toml\|Pipfile$"; then
+  if ! echo "$STAGED_FILES" | grep -q "Pipfile\.lock\|poetry\.lock\|uv\.lock"; then
+    print_warn "Python dependencies changed but no lock file (Pipfile.lock/poetry.lock) updated"
+  else
+    print_pass "Python lock file updated"
+  fi
+fi
+
+# ──────────────────────────────────────────────────────────────────
+# 3. DANGEROUS PATTERNS IN CODE
+# Catch common security anti-patterns before they're committed.
+# ──────────────────────────────────────────────────────────────────
+print_header "Security Anti-Pattern Check"
+
+# Files to scan (exclude vendor/deps/generated)
+SCAN_FILES=$(echo "$STAGED_FILES" | grep -vE "node_modules|\.min\.|vendor/|dist/|generated/|\.lock$|\.snap$" || true)
+
+if [ -n "$SCAN_FILES" ]; then
+  CODE_ISSUES=0
+
+  # eval() with non-literal arguments — common code injection vector
+  if echo "$STAGED_DIFF" | grep -qE 'eval\s*\([^)]{5,}\)' 2>/dev/null; then
+    # Exclude template literals that are clearly constant
+    if echo "$STAGED_DIFF" | grep -E 'eval\s*\(' | grep -qvE "eval\s*\(['\"]"; then
+      print_warn "eval() with dynamic argument detected — review for code injection risk"
+      CODE_ISSUES=$((CODE_ISSUES + 1))
+    fi
+  fi
+
+  # SQL string concatenation patterns
+  if echo "$STAGED_DIFF" | grep -qE '(SELECT|INSERT|UPDATE|DELETE|WHERE).*\+.*\$|f"(SELECT|INSERT|UPDATE|DELETE|WHERE)' 2>/dev/null; then
+    print_warn "Possible SQL string concatenation — use parameterised queries"
+    CODE_ISSUES=$((CODE_ISSUES + 1))
+  fi
+
+  # TODO/FIXME security markers
+  if echo "$STAGED_DIFF" | grep -qiE '\+.*(TODO|FIXME).*(auth|security|inject|password|secret|token)' 2>/dev/null; then
+    print_warn "Security-related TODO/FIXME in staged changes — review before shipping"
+  fi
+
+  # debug/console.log with sensitive keywords
+  if echo "$STAGED_DIFF" | grep -qiE '\+(console\.log|print|debugger).*(password|secret|token|key|credential)' 2>/dev/null; then
+    print_warn "Possible sensitive data in log statement — review before committing"
+    CODE_ISSUES=$((CODE_ISSUES + 1))
+  fi
+
+  if [ $CODE_ISSUES -eq 0 ]; then
+    print_pass "No obvious security anti-patterns detected"
+  fi
+fi
+
+# ──────────────────────────────────────────────────────────────────
+# RESULT
+# ──────────────────────────────────────────────────────────────────
+echo ""
+
+if [ $BLOCKERS -gt 0 ]; then
+  echo -e "${RED}${BOLD}[Secure SDLC] Pre-commit hook BLOCKED — $BLOCKERS issue(s) must be resolved.${NC}"
+  echo ""
+  echo -e "${YELLOW}If a secret was detected:${NC}"
+  echo "  1. Remove it from staged files"
+  echo "  2. Rotate the secret immediately — assume it is compromised even on a private branch"
+  echo "  3. Move it to a secrets manager (Vault, AWS Secrets Manager, etc.)"
+  echo ""
+  echo -e "${YELLOW}For help with secrets management:${NC}"
+  echo "  claude --agent cloud-platform-engineer 'Advise on secrets management for [your stack]'"
+  echo "  # OR: sdlc_security_champion({ question_or_code: 'How do I manage secrets for [stack]?' })"
+  echo ""
+  exit 1
+else
+  echo -e "${GREEN}${BOLD}[Secure SDLC] Pre-commit checks passed.${NC}"
+fi
+
+exit 0

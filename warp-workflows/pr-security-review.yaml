@@ -1,0 +1,47 @@
+---
+name: "Secure SDLC: PR Security Review"
+command: |
+  # ── Secure SDLC PR Security Review ─────────────────────────────────────────
+  # Runs dev-lead + appsec-engineer review on a pull request.
+  # Reference: docs/security-requirements.md for acceptance criteria.
+
+  echo "🟡 BUILD PHASE — PR Security Review #{{pr_number}}"
+  echo ""
+
+  # Dev Lead: secure coding review
+  echo "Dev Lead review..."
+  claude --agent dev-lead \
+    "Security review PR #{{pr_number}} — {{pr_description}}. \
+     Stack: {{stack}}. \
+     Reference security requirements in docs/security-requirements.md. \
+     Flag any CRITICAL or HIGH issues that must be fixed before merge. \
+     Note any new dependencies added."
+
+  echo ""
+  echo "AppSec triage..."
+
+  # AppSec Engineer: SAST triage and deeper vuln analysis
+  claude --agent appsec-engineer \
+    "Triage security findings for PR #{{pr_number}} — {{pr_description}}. \
+     Review dev-lead findings and add any additional vulnerability analysis. \
+     Update docs/sast-findings.md with any new findings."
+
+  echo ""
+  echo "✅ PR security review complete."
+  echo "   CRITICAL/HIGH findings must be resolved before merge."
+  echo "   MEDIUM findings should be resolved or risk-accepted before release."
+tags:
+  - security
+  - sdlc
+  - build
+  - pr-review
+arguments:
+  - name: pr_number
+    description: "Pull request number (e.g. '42')"
+    default_value: ""
+  - name: pr_description
+    description: "Brief description of what the PR does"
+    default_value: ""
+  - name: stack
+    description: "Technology stack"
+    default_value: ""

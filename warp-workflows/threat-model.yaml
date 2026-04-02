@@ -1,0 +1,56 @@
+---
+name: "Secure SDLC: Threat Model"
+command: |
+  # ── Secure SDLC Threat Model ────────────────────────────────────────────────
+  # Runs a STRIDE threat model (+ optional LINDDUN) on your architecture.
+  # Prerequisites: docs/security-requirements.md must exist (run Plan phase first).
+
+  echo "🟣 DESIGN PHASE — Threat Model: {{feature_name}}"
+  echo ""
+
+  if [ ! -f "docs/security-requirements.md" ]; then
+    echo "⚠  docs/security-requirements.md not found."
+    echo "   Run the 'Feature Kickoff' workflow first to generate requirements."
+    echo ""
+  fi
+
+  claude --agent appsec-engineer \
+    "Threat model {{feature_name}} using STRIDE. \
+     Architecture: {{architecture_description}}. \
+     {{pii_flag}} \
+     Reference security requirements in docs/security-requirements.md. \
+     Save threat model to docs/threat-model.md."
+
+  echo ""
+
+  if [ "{{has_infra}}" = "true" ]; then
+    echo "Cloud/Platform Engineer: infrastructure review..."
+    claude --agent cloud-platform-engineer \
+      "Review infrastructure design for {{feature_name}}: {{infra_description}}. \
+       Save review to docs/infra-security-review.md."
+    echo ""
+  fi
+
+  echo "✅ Design phase outputs saved to docs/."
+  echo "   Review CRITICAL and HIGH threats before implementation begins."
+tags:
+  - security
+  - sdlc
+  - design
+  - threat-model
+arguments:
+  - name: feature_name
+    description: "Feature or system name being modelled"
+    default_value: ""
+  - name: architecture_description
+    description: "Architecture description: components, data flows, trust boundaries, protocols, auth"
+    default_value: ""
+  - name: pii_flag
+    description: "Set to 'Also run LINDDUN privacy threat model — PII is in scope.' if feature handles PII"
+    default_value: ""
+  - name: has_infra
+    description: "Include infrastructure review? (true/false)"
+    default_value: "false"
+  - name: infra_description
+    description: "Infrastructure description (if has_infra is true)"
+    default_value: ""

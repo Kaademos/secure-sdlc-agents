@@ -1,0 +1,49 @@
+---
+name: "Secure SDLC: Feature Kickoff"
+command: |
+  # ── Secure SDLC Feature Kickoff ───────────────────────────────────────────
+  # Starts a new feature with ASVS requirements, risk register, and a threat
+  # model — the Plan and Design phases in one interactive session.
+  #
+  # Step 1: Initialise docs directory if not present
+  mkdir -p docs/audit-evidence
+
+  # Step 2: Generate security requirements (Plan phase)
+  echo "🔵 PLAN PHASE — Security Requirements"
+  claude --agent product-manager \
+    "Define security requirements for: {{feature_description}}. \
+     Stack: {{stack}}. \
+     ASVS Level: {{asvs_level}}. \
+     Compliance frameworks: {{compliance_frameworks}}. \
+     Save output to docs/security-requirements.md"
+
+  # Step 3: Initialise risk register
+  echo ""
+  echo "🔵 PLAN PHASE — Risk Register"
+  claude --agent grc-analyst \
+    "Initialise risk register for: {{feature_description}}. \
+     Map requirements from docs/security-requirements.md to compliance controls. \
+     Save output to docs/risk-register.md"
+
+  echo ""
+  echo "✅ Plan phase complete. Review docs/security-requirements.md and docs/risk-register.md"
+  echo ""
+  echo "Next: Design phase — run 'Secure SDLC: Threat Model' workflow after documenting your architecture."
+tags:
+  - security
+  - sdlc
+  - plan
+  - requirements
+arguments:
+  - name: feature_description
+    description: "What you're building (e.g. 'user authentication with email/password and TOTP MFA')"
+    default_value: ""
+  - name: stack
+    description: "Technology stack (e.g. 'Next.js + PostgreSQL', 'Python FastAPI + AWS')"
+    default_value: "Node.js"
+  - name: asvs_level
+    description: "ASVS level (L1/L2/L3)"
+    default_value: "L2"
+  - name: compliance_frameworks
+    description: "Compliance frameworks (e.g. 'SOC2, GDPR' or 'none')"
+    default_value: "none"

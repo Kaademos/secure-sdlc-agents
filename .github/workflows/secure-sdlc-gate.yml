@@ -1,0 +1,325 @@
+name: Secure SDLC Gate
+
+on:
+  pull_request:
+    branches: [main, master, develop, staging]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version for full gate (e.g. v1.2.0)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  # ────────────────────────────────────────────────────────────────
+  # SDLC Artefact Gate
+  # Checks that required security documents exist and are not
+  # blank templates before allowing merges to protected branches.
+  # ────────────────────────────────────────────────────────────────
+  artefact-gate:
+    name: SDLC Artefact Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check required security artefacts
+        id: artefact-check
+        run: |
+          set +e
+          BLOCKERS=()
+          WARNINGS=()
+          
+          check_artefact() {
+            local file="$1"
+            local label="$2"
+            local required="$3"
+            
+            if [ ! -f "$file" ]; then
+              if [ "$required" = "true" ]; then
+                BLOCKERS+=("MISSING: $file ($label)")
+                echo "::error file=$file::Required security artefact missing: $file"
+              else
+                WARNINGS+=("MISSING (optional): $file")
+              fi
+              return 1
+            fi
+            
+            # Check if it's an unfilled template
+            if grep -q "\[Feature Name\]\|\[YYYY-MM-DD\]\|\[Brief description" "$file" 2>/dev/null; then
+              local wc=$(wc -l < "$file")
+              # Short files with placeholder text are unfilled templates
+              if [ "$wc" -lt 200 ]; then
+                if [ "$required" = "true" ]; then
+                  BLOCKERS+=("TEMPLATE UNFILLED: $file - appears to be the blank template, not a completed document")
+                  echo "::error file=$file::Security artefact appears to be an unfilled template: $file"
+                fi
+                return 1
+              fi
+            fi
+            
+            echo "✓ $file"
+            return 0
+          }
+          
+          # PLAN phase artefacts — required for all PRs to main/master
+          TARGET="${{ github.base_ref }}"
+          
+          if [[ "$TARGET" == "main" || "$TARGET" == "master" ]]; then
+            check_artefact "docs/security-requirements.md" "product-manager / PLAN" "true"
+            check_artefact "docs/risk-register.md" "grc-analyst / PLAN" "true"
+            check_artefact "docs/threat-model.md" "appsec-engineer / DESIGN" "true"
+            check_artefact "docs/sast-findings.md" "appsec-engineer / BUILD" "true"
+          else
+            # For non-main branches, warn if artefacts are missing
+            check_artefact "docs/security-requirements.md" "product-manager / PLAN" "false"
+            check_artefact "docs/risk-register.md" "grc-analyst / PLAN" "false"
+          fi
+          
+          # Always optional
+          check_artefact "docs/infra-security-review.md" "cloud-platform-engineer / DESIGN" "false"
+          
+          # Report
+          if [ ${#BLOCKERS[@]} -gt 0 ]; then
+            echo ""
+            echo "::group::Gate Blockers"
+            for b in "${BLOCKERS[@]}"; do
+              echo "  ✗ $b"
+            done
+            echo "::endgroup::"
+            echo "GATE_RESULT=FAIL" >> $GITHUB_OUTPUT
+            echo "BLOCKERS=${BLOCKERS[*]}" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "GATE_RESULT=PASS" >> $GITHUB_OUTPUT
+            echo "All required artefacts present."
+          fi
+
+  # ────────────────────────────────────────────────────────────────
+  # Secret Scanning
+  # Detect accidentally committed secrets before they hit the repo.
+  # ────────────────────────────────────────────────────────────────
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for secrets with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        continue-on-error: false
+
+  # ────────────────────────────────────────────────────────────────
+  # Dependency Security (SCA)
+  # Check for known CVEs in direct dependencies.
+  # ────────────────────────────────────────────────────────────────
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Node.js project
+        id: detect-node
+        run: |
+          if [ -f "package.json" ]; then
+            echo "IS_NODE=true" >> $GITHUB_OUTPUT
+          else
+            echo "IS_NODE=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Detect Python project
+        id: detect-python
+        run: |
+          if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] || [ -f "Pipfile" ]; then
+            echo "IS_PYTHON=true" >> $GITHUB_OUTPUT
+          else
+            echo "IS_PYTHON=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        if: steps.detect-node.outputs.IS_NODE == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: npm audit (Node.js)
+        if: steps.detect-node.outputs.IS_NODE == 'true'
+        run: |
+          npm audit --audit-level=high --json > npm-audit.json || true
+          # Fail on CRITICAL vulnerabilities in direct dependencies
+          CRITICALS=$(cat npm-audit.json | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          vulns = data.get('vulnerabilities', {})
+          criticals = [k for k, v in vulns.items() if v.get('severity') == 'critical' and v.get('isDirect', False)]
+          print(len(criticals))
+          " 2>/dev/null || echo "0")
+          
+          if [ "$CRITICALS" -gt 0 ]; then
+            echo "::error::$CRITICALS CRITICAL CVE(s) in direct dependencies. Run: npm audit fix"
+            exit 1
+          fi
+          echo "Dependency scan: no critical CVEs in direct dependencies"
+
+      - name: Setup Python
+        if: steps.detect-python.outputs.IS_PYTHON == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: pip-audit (Python)
+        if: steps.detect-python.outputs.IS_PYTHON == 'true'
+        run: |
+          pip install pip-audit --quiet
+          pip-audit --format=json --output=pip-audit.json 2>/dev/null || pip-audit || true
+          echo "Python dependency scan complete"
+
+  # ────────────────────────────────────────────────────────────────
+  # IaC Security Scan
+  # Scan Terraform, Kubernetes, Helm, and Docker for misconfigurations.
+  # ────────────────────────────────────────────────────────────────
+  iac-scan:
+    name: IaC Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for IaC files
+        id: detect-iac
+        run: |
+          if find . -name "*.tf" -o -name "*.tfvars" | grep -q .; then
+            echo "HAS_TERRAFORM=true" >> $GITHUB_OUTPUT
+          fi
+          if find . -name "*.yaml" -o -name "*.yml" | xargs grep -l "kind: Deployment\|kind: Service\|kind: ConfigMap" 2>/dev/null | grep -q .; then
+            echo "HAS_K8S=true" >> $GITHUB_OUTPUT
+          fi
+          if find . -name "Dockerfile" | grep -q .; then
+            echo "HAS_DOCKER=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkov (Terraform + K8s + Docker)
+        if: steps.detect-iac.outputs.HAS_TERRAFORM == 'true' || steps.detect-iac.outputs.HAS_K8S == 'true' || steps.detect-iac.outputs.HAS_DOCKER == 'true'
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          soft_fail: true
+          output_format: sarif
+          output_file_path: checkov.sarif
+        continue-on-error: true
+
+      - name: Upload Checkov SARIF
+        if: always() && (steps.detect-iac.outputs.HAS_TERRAFORM == 'true' || steps.detect-iac.outputs.HAS_K8S == 'true')
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov.sarif
+        continue-on-error: true
+
+  # ────────────────────────────────────────────────────────────────
+  # SAST (CodeQL)
+  # Static analysis for common vulnerability classes.
+  # ────────────────────────────────────────────────────────────────
+  sast:
+    name: SAST (CodeQL)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript-typescript', 'python']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check language files exist
+        id: check-lang
+        run: |
+          LANG="${{ matrix.language }}"
+          if [ "$LANG" = "javascript-typescript" ]; then
+            find . -name "*.js" -o -name "*.ts" | grep -v node_modules | grep -q . && echo "EXISTS=true" >> $GITHUB_OUTPUT || echo "EXISTS=false" >> $GITHUB_OUTPUT
+          elif [ "$LANG" = "python" ]; then
+            find . -name "*.py" | grep -q . && echo "EXISTS=true" >> $GITHUB_OUTPUT || echo "EXISTS=false" >> $GITHUB_OUTPUT
+          else
+            echo "EXISTS=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Initialize CodeQL
+        if: steps.check-lang.outputs.EXISTS == 'true'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Autobuild
+        if: steps.check-lang.outputs.EXISTS == 'true'
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        if: steps.check-lang.outputs.EXISTS == 'true'
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # ────────────────────────────────────────────────────────────────
+  # Release Gate (on workflow_dispatch with version)
+  # Full pre-release security checklist.
+  # ────────────────────────────────────────────────────────────────
+  release-gate:
+    name: Release Security Gate
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_version != ''
+    needs: [artefact-gate, secret-scan, dependency-scan, iac-scan, sast]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run release gate
+        run: |
+          VERSION="${{ github.event.inputs.release_version }}"
+          echo "Running release gate for $VERSION"
+          
+          # Check all release artefacts
+          BLOCKERS=()
+          
+          for file in \
+            "docs/security-requirements.md" \
+            "docs/risk-register.md" \
+            "docs/threat-model.md" \
+            "docs/sast-findings.md" \
+            "docs/test-security-report.md"; do
+            if [ ! -f "$file" ]; then
+              BLOCKERS+=("MISSING: $file")
+            fi
+          done
+          
+          if [ ${#BLOCKERS[@]} -gt 0 ]; then
+            echo "::error::Release gate FAILED for $VERSION"
+            for b in "${BLOCKERS[@]}"; do
+              echo "::error::$b"
+            done
+            exit 1
+          fi
+          
+          echo "Release gate PASSED for $VERSION"
+          echo "Generate formal sign-off with:"
+          echo "  claude --agent release-manager 'Run pre-release security checklist for $VERSION'"

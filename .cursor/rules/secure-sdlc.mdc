@@ -1,0 +1,98 @@
+---
+description: Secure SDLC — automatically apply security practices at every phase of development
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.py", "**/*.go", "**/*.rb", "**/*.java", "**/*.kt", "**/*.rs", "**/*.tf", "**/*.yaml", "**/*.yml", "**/*.json"]
+alwaysApply: true
+---
+
+# Secure SDLC — Active Security Context
+
+You are operating with a **Secure SDLC agent team** available via MCP tools (`sdlc_*`).
+Apply security thinking at every step. Do not wait to be asked.
+
+---
+
+## When writing or reviewing code, automatically check:
+
+### Authentication & Session
+- Every API route / endpoint has authentication enforced — no auth bypass paths
+- Session tokens are cryptographically random (≥128 bits) and invalidated on logout
+- Passwords stored with bcrypt (cost ≥12), Argon2id, or scrypt — never MD5/SHA alone
+- JWT tokens have `alg` validated explicitly — never accept `alg: none`
+
+### Authorisation
+- Every object access checks the requesting user OWNS or has permission for that SPECIFIC resource (prevent IDOR)
+- Default deny: if no rule grants access, deny
+- Server-side auth on every request — never trust client-supplied role claims
+
+### Input Handling
+- All inputs validated server-side (allowlist, not denylist)
+- Queries use parameterised statements / ORM — no string concatenation with user input
+- File uploads: validate by magic bytes (not MIME/extension), reject SVG, randomise stored filenames
+- Never use user input directly in filesystem paths, shell commands, or eval
+
+### Secrets & Cryptography
+- No secrets in code, config files, or environment files committed to git
+- AES-256-GCM or ChaCha20-Poly1305 for encryption at rest
+- TLS 1.2 minimum for all communications; TLS 1.3 preferred
+- Keys live in secrets managers (Vault, AWS SM, etc.) — never hardcoded
+
+### Error Handling & Logging
+- Generic error messages to users; detailed errors logged server-side
+- Never log credentials, tokens, PII, or payment data
+- Log: auth attempts, access control decisions, admin actions (timestamp, user, IP, outcome)
+
+### Dependencies
+- New packages reviewed before adding: check CVE status, maintenance, download count
+- SCA (Software Composition Analysis) on every PR
+
+---
+
+## MCP Tool Triggers — invoke automatically when these situations occur:
+
+| Situation | Tool to invoke |
+|---|---|
+| Starting a new feature | `sdlc_plan_feature` |
+| Designing architecture | `sdlc_threat_model` |
+| Reviewing a PR or code diff | `sdlc_review_pr` |
+| Writing/reviewing Terraform, K8s, Helm | `sdlc_review_infra` |
+| SAST tool produced findings | `sdlc_triage_sast` |
+| About to deploy / release | `sdlc_release_gate` |
+| Building AI/LLM features | `sdlc_ai_security_review` |
+| Quick security question | `sdlc_security_champion` |
+
+---
+
+## Severity gate (blocks progression):
+
+- **CRITICAL** → stop, do not proceed, must be fixed
+- **HIGH** → flag prominently, must be resolved or formally accepted before release
+- **MEDIUM** → document in risk register, remediate before release
+- **LOW** → track, fix as normal backlog
+
+---
+
+## Phase artefacts — remind the user to produce these:
+
+| Phase | Artefact | Agent |
+|---|---|---|
+| PLAN | `docs/security-requirements.md` | product-manager |
+| PLAN | `docs/risk-register.md` | grc-analyst |
+| DESIGN | `docs/threat-model.md` | appsec-engineer |
+| DESIGN | `docs/infra-security-review.md` | cloud-platform-engineer |
+| BUILD | `docs/sast-findings.md` | appsec-engineer |
+| TEST | `docs/test-security-report.md` | appsec-engineer |
+| RELEASE | `docs/release-security-sign-off.md` | release-manager |
+
+If these don't exist when relevant code is being written, proactively suggest creating them.
+
+---
+
+## AI/LLM feature security (2026):
+
+When you see code that calls an LLM API, processes user input sent to a model, or builds
+agentic systems, always check for:
+- **Prompt injection** — can user input override system instructions?
+- **Indirect prompt injection** — can retrieved content inject instructions?
+- **Tool/function abuse** — what can a manipulated model be tricked into calling?
+- **PII leakage** — is sensitive data being sent to external model APIs without consent?
+- **Output validation** — are AI outputs validated before use in downstream systems?
