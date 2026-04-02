@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.0.1]
+## [1.0.2]
 
 ### Added
 - **npm package** `@kaademos/secure-sdlc` (root `package.json`) — global install via `npm install -g @kaademos/secure-sdlc`, `npx @kaademos/secure-sdlc`, semver releases;
