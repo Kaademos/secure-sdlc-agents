@@ -1,6 +1,6 @@
 {
   "name": "@kaademos/secure-sdlc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Secure SDLC agent team — CLI to scaffold docs, hooks, CI, and MCP-ready security workflows",
   "type": "module",
   "bin": {
