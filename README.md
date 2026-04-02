@@ -189,6 +189,24 @@ RELEASE     release-manager (go/no-go)
 - **LOW** — tracked in risk register, does not block
 
 ---
+## Frequently Asked Questions
+
+**Q: Where do I put my OpenAI or Anthropic API key?**
+You don't need to provide an API key to `secure-sdlc`. This project does not make LLM API calls directly. Instead, it acts as an MCP server and prompt-generation engine that feeds specialized security context to your "host" AI tool (Cursor, Windsurf, Claude Code). Your API keys and billing are handled entirely by your host application.
+
+**Q: Do I have to manually fill out the Markdown templates?**
+No. While the project provides structured templates in `docs/templates/`, you do not fill them out by hand. When you invoke a tool like `sdlc_plan_feature`, the MCP server passes the blank template to your AI assistant, and the AI automatically writes the completed, project-specific markdown file directly to your `docs/` folder.
+
+**Q: Do the AI agents run automatically in my CI/CD pipeline?**
+No, the AI agents are designed to be used locally by developers during the coding process (e.g., in your IDE or terminal). The provided GitHub Actions workflow (`secure-sdlc-gate.yml`) does *not* invoke LLMs. Instead, it acts as a deterministic **gatekeeper**—it runs traditional tools (like Gitleaks, Checkov, CodeQL) and verifies that the AI-generated artifacts actually exist and are fully filled out before allowing a merge.
+
+**Q: Will this use a lot of API tokens/credits?**
+Because this tool feeds comprehensive security frameworks (like OWASP ASVS), infrastructure checklists, and full file templates into your AI's context window, it can consume a significant number of tokens. Ensure your host application (like Claude Code or your Cursor subscription) has sufficient limits for handling large context prompts.
+
+**Q: Can I customize the templates for my own company's requirements?**
+Yes. When you run `secure-sdlc init`, the default templates are copied into your local `docs/templates/` directory. You can modify these markdown files to include your own company's specific compliance headers, and the agents will use your customized versions going forward.
+
+---
 
 ## MCP tools reference
 
