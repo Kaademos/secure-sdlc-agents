@@ -3,3 +3,5 @@ cli/node_modules/
 mcp/node_modules/
 *.log
 .DS_Store
+.docs/
+
