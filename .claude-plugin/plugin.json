@@ -1,6 +1,6 @@
 {
   "name": "secure-sdlc-agents",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A team of AI security specialists embedded in your coding workflow. 8 agents covering every phase of the Secure SDLC: requirements, threat modelling, code review, IaC security, compliance, and release gating. Works with Claude Code, Cursor, Windsurf, and any MCP-compatible tool.",
   "author": {
     "name": "Kaademos",
