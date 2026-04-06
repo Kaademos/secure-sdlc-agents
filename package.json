@@ -1,6 +1,6 @@
 {
   "name": "@kaademos/secure-sdlc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Secure SDLC agent team — CLI to scaffold docs, hooks, CI, and MCP-ready security workflows",
   "type": "module",
   "bin": {
@@ -15,6 +15,8 @@
     "docs/templates",
     "hooks",
     "stacks",
+    "skills",
+    ".claude-plugin",
     "warp-workflows",
     ".github/workflows/secure-sdlc-gate.yml",
     ".cursor/rules",

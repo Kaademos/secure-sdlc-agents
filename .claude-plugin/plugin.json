@@ -1,0 +1,31 @@
+{
+  "name": "secure-sdlc-agents",
+  "version": "1.0.0",
+  "description": "A team of AI security specialists embedded in your coding workflow. 8 agents covering every phase of the Secure SDLC: requirements, threat modelling, code review, IaC security, compliance, and release gating. Works with Claude Code, Cursor, Windsurf, and any MCP-compatible tool.",
+  "author": {
+    "name": "Kaademos",
+    "url": "https://github.com/Kaademos"
+  },
+  "repository": "https://github.com/Kaademos/secure-sdlc-agents",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "appsec",
+    "sdlc",
+    "owasp",
+    "asvs",
+    "compliance",
+    "threat-modeling",
+    "secure-coding"
+  ],
+  "agents": [
+    ".claude/agents/product-manager.md",
+    ".claude/agents/appsec-engineer.md",
+    ".claude/agents/grc-analyst.md",
+    ".claude/agents/cloud-platform-engineer.md",
+    ".claude/agents/dev-lead.md",
+    ".claude/agents/release-manager.md",
+    ".claude/agents/security-champion.md",
+    ".claude/agents/ai-security-engineer.md"
+  ]
+}

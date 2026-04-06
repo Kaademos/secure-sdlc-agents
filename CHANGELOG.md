@@ -8,6 +8,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] — 2026-04-06
+
+### Added
+- **`.claude-plugin/plugin.json`** — Claude Code plugin marketplace manifest; agents now installable with a single `/plugin marketplace add Kaademos/secure-sdlc-agents` command (zero-dependency, no npm, no cloning)
+- **`skills/` directory** — 4 SKILL.md files in the agent-skills–compatible format for cross-ecosystem discoverability:
+  - `skills/security-and-hardening/` — secure coding, PR review, OWASP Top 10 prevention, severity gating
+  - `skills/threat-modeling/` — STRIDE + LINDDUN structured threat model workflow
+  - `skills/ai-security/` — OWASP LLM Top 10 2025, prompt injection, excessive agency, output validation
+  - `skills/compliance-and-audit/` — risk register, framework mapping (SOC 2, ISO 27001, GDPR, PCI DSS), audit evidence
+- **README — "Option 0"** plugin marketplace as the first and fastest install path (before git clone and npm)
+- **README — "The 4-Minute Problem"** concrete breach table replacing the generic problem statement — 5 real vulnerabilities a vibe-coded file upload misses, each mapped to the catching agent
+- **README — "Who Do You Call?"** ASCII decision tree covering every SDLC moment → correct agent → exact command
+
+### Changed
+- **README.md** — title tagline tightened to be specific and direct ("8 AI security specialists. Invoked at the exact phase where each vulnerability would have been caught.")
+- **`package.json` `files`** — added `skills/` and `.claude-plugin/` to the npm publish manifest
+
+
 ### Added
 - **npm package** `@kaademos/secure-sdlc` (root `package.json`) — global install via `npm install -g @kaademos/secure-sdlc`, `npx @kaademos/secure-sdlc`, semver releases;
 - **`secure-sdlc paths`** — prints `PACKAGE_ROOT` and MCP server path after install

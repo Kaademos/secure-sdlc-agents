@@ -6,22 +6,28 @@
 
 # Secure SDLC Agents
 
-A team of AI security specialists — embedded directly in your vibe coding workflow.
+**8 AI security specialists. Invoked at the exact phase where each vulnerability would have been caught.**
 
-They cover every phase of the Software Development Lifecycle: requirements, architecture,
-code review, infrastructure, compliance, and release gating. They work wherever you work:
-Claude Code, Cursor, Windsurf, Warp, and any tool that supports MCP.
+Requirements → threat modelling → code review → IaC → compliance → release gate.  
+Works in Claude Code, Cursor, Windsurf, Warp, and any MCP-compatible tool.
 
 ---
 
-## The problem this solves
+## The 4-Minute Problem
 
-When developers use AI tools to build fast, security becomes the thing that gets bolted on
-at the end — or skipped entirely. Threat models don't happen. ASVS requirements are never
-written. Compliance evidence is scrambled together the night before an audit.
+You asked Claude Code to build a file upload feature. It wrote working code in 4 minutes.
 
-This project makes the security team part of the build process from day one. Not a gate
-at the end, but a set of specialists you summon at the exact moment their expertise is needed.
+It missed:
+
+| Vulnerability | Severity | Which agent catches it |
+|---|---|---|
+| SVG file with embedded `<script>` stored and served without sanitisation | **CRITICAL** | `appsec-engineer` — MIME type validation, output encoding |
+| No file size limit or type allowlist | **HIGH** | `appsec-engineer` — input validation, magic byte checks |
+| S3 bucket provisioned with `public-read` ACL | **CRITICAL** | `cloud-platform-engineer` — IaC security review |
+| No rate limiting on the upload endpoint | **HIGH** | `appsec-engineer` — anti-automation controls |
+| Upload URL in API response leaks internal bucket path | **MEDIUM** | `dev-lead` — information disclosure review |
+
+Every one of these has appeared in real breach post-mortems. AI agents optimise for *working code*, not *secure code*. This project embeds the specialists that close that gap — at the exact phase where each issue would have been caught.
 
 ---
 
@@ -57,9 +63,46 @@ at the end, but a set of specialists you summon at the exact moment their expert
 
 ---
 
+## Who Do You Call?
+
+```
+What are you working on?
+│
+├── Starting a new feature?
+│   ├── product-manager  →  "Define security requirements for X using ASVS L2"
+│   └── grc-analyst      →  "Initialise risk register, map to SOC2 / GDPR / PCI-DSS"
+│
+├── Designing the architecture?
+│   ├── appsec-engineer          →  "Threat model this design using STRIDE"
+│   ├── cloud-platform-engineer  →  "Review IaC for this feature"
+│   └── ai-security-engineer     →  "Security review — feature calls an LLM"  ← always include this
+│
+├── Writing or merging code?
+│   ├── dev-lead       →  "Review PR #N for secure coding issues and dependency risks"
+│   └── appsec-engineer  →  "Triage SAST findings for PR #N"
+│
+├── Quick security question (any phase)?
+│   └── security-champion  →  "Is this pattern / library safe? Context: ..."
+│
+└── Ready to ship?
+    └── release-manager  →  "Run pre-release security checklist for vX.Y.Z"
+```
+
+---
+
 ## Quick start
 
-### Option A — Claude Code (zero dependencies)
+### Option 0 — Claude Code Plugin Marketplace (one command, nothing to install)
+
+```bash
+/plugin marketplace add Kaademos/secure-sdlc-agents
+```
+
+All 8 agents are immediately available in your session. No cloning, no npm, no file copying.
+
+---
+
+### Option A — Git clone (zero dependencies)
 
 ```bash
 git clone https://github.com/Kaademos/secure-sdlc-agents.git
