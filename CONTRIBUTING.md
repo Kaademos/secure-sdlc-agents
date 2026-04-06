@@ -60,6 +60,12 @@ When editing agent files in `.claude/agents/`:
 - Do not bloat agents with exhaustive checklists that will never be followed. Prefer
   focused, actionable guidance over completeness theatre.
 
+For structure, frontmatter, MCP wiring, and how to add a new agent, see **[docs/agent-anatomy.md](docs/agent-anatomy.md)**.
+
+To validate and distribute the Claude Code plugin (including Anthropic’s official submission forms), see **[docs/claude-code-marketplace-submission.md](docs/claude-code-marketplace-submission.md)**.
+
+For GitHub Discussions, issues, and labels (e.g. good first issue), see **[docs/community.md](docs/community.md)**.
+
 ---
 
 ## Document template guidelines
