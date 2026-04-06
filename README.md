@@ -92,10 +92,12 @@ What are you working on?
 
 ## Quick start
 
-### Option 0 — Claude Code Plugin Marketplace (one command, nothing to install)
+### Option 0 — Claude Code Plugin Marketplace
 
 ```bash
 /plugin marketplace add Kaademos/secure-sdlc-agents
+
+/plugin install secure-sdlc-agents@secure-sdlc-agents
 ```
 
 All 8 agents are immediately available in your session. No cloning, no npm, no file copying.
