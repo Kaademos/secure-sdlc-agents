@@ -45,16 +45,7 @@
         "threat-modeling",
         "agent-skills"
       ],
-      "agents": [
-        ".claude/agents/product-manager.md",
-        ".claude/agents/appsec-engineer.md",
-        ".claude/agents/grc-analyst.md",
-        ".claude/agents/cloud-platform-engineer.md",
-        ".claude/agents/dev-lead.md",
-        ".claude/agents/release-manager.md",
-        ".claude/agents/security-champion.md",
-        ".claude/agents/ai-security-engineer.md"
-      ]
+      "strict": true
     }
   ]
 }
