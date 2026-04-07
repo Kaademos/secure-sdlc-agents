@@ -9,6 +9,7 @@
 **8 AI security specialists. Invoked at the exact phase where each vulnerability would have been caught.**
 
 Requirements → threat modelling → code review → IaC → compliance → release gate.  
+
 Works in Claude Code, Cursor, Windsurf, Warp, and any MCP-compatible tool.
 
 ---
