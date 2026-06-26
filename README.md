@@ -376,6 +376,8 @@ In `warp-workflows/` — import into Warp for one-click SDLC automation:
 | [`01-login-feature/`](examples/01-login-feature/) | Auth flow (bcrypt, MFA, sessions) | JWT alg:none, hardcoded secrets, cost factor |
 | [`02-api-endpoint/`](examples/02-api-endpoint/) | Public REST API | IDOR via UUID path param, IAM over-privilege |
 | [`03-file-upload/`](examples/03-file-upload/) | File upload to S3 | SVG XSS, magic byte validation, public bucket |
+| [`04-oauth-flow/`](examples/04-oauth-flow/) | OAuth 2.0 / OIDC social login | redirect_uri exact match, PKCE, state vs nonce, ID-token validation |
+| [`05-payment-processing/`](examples/05-payment-processing/) | Card checkout (hosted page) | PCI DSS SAQ A scoping, webhook signature, idempotency, amount tampering |
 
 ---
 
