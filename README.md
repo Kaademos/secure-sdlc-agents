@@ -1,4 +1,4 @@
-[![CI](https://github.com/Kaademos/secure-sdlc-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/Kaademos/secure-sdlc-agents/actions/workflows/ci.yml)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Kaademos/secure-sdlc-agents/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Kaademos/secure-sdlc-agents/tree/main)
 [![npm version](https://img.shields.io/npm/v/@kaademos/secure-sdlc?logo=npm)](https://www.npmjs.com/package/@kaademos/secure-sdlc)
 [![node](https://img.shields.io/node/v/@kaademos/secure-sdlc)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)

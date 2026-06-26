@@ -1,0 +1,84 @@
+version: 2.1
+
+# CI for @kaademos/secure-sdlc.
+# - test:    runs the suite on Node 18/20/22 + verifies the npm package contents
+# - publish: on a v* tag, re-tests then publishes to npm (needs NPM_TOKEN env var)
+#
+# NOTE: .github/workflows/secure-sdlc-gate.yml is intentionally NOT migrated — it
+# is a product template shipped to end users and uses GitHub-native CodeQL.
+
+orbs:
+  node: circleci/node@5
+
+jobs:
+  test:
+    parameters:
+      node-version:
+        type: string
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - node/install:
+          node-version: << parameters.node-version >>
+      - run:
+          name: Node and npm versions
+          command: node --version && npm --version
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Run tests
+          command: npm test
+      - run:
+          name: Verify npm package contents
+          command: npm run test:pack
+
+  publish:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - node/install:
+          node-version: "20"
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Run tests
+          command: npm test
+      - run:
+          name: Verify tag matches package.json version
+          command: |
+            TAG="${CIRCLE_TAG#v}"
+            PKG="$(node -p "require('./package.json').version")"
+            if [ "$TAG" != "$PKG" ]; then
+              echo "Tag v$TAG does not match package.json version $PKG" && exit 1
+            fi
+            echo "Releasing v$PKG"
+      - run:
+          name: Publish to npm
+          command: |
+            if [ -z "$NPM_TOKEN" ]; then
+              echo "NPM_TOKEN is not set — add it as a CircleCI project env var" && exit 1
+            fi
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+            npm publish --access public
+
+workflows:
+  ci:
+    jobs:
+      - test:
+          matrix:
+            parameters:
+              node-version: ["18", "20", "22"]
+
+  release:
+    jobs:
+      - publish:
+          # Run only for v* tags, never on branch pushes.
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

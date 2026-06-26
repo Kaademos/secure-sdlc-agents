@@ -15,8 +15,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Worked example `05-payment-processing`** — redirect-based hosted checkout (PCI DSS SAQ A); webhook signature verification, idempotency, server-side amount, reflecting the Jan 2025 SAQ A changes
 - **HIPAA, DORA, and FedRAMP** control tables in `compliance-attestation.md` and the GRC agent's control-mapping example
 - **Automated test suite** (`test/`, Node built-in runner, zero new dependencies) — guards version sync across manifests, agent frontmatter, and the stack-detection ↔ `stacks/*.md` mapping
-- **CI workflow** (`.github/workflows/ci.yml`) — runs the suite on Node 18, 20, and 22 plus an `npm pack` content check
-- **Release workflow** (`.github/workflows/release.yml`) — publishes to npm with provenance and creates a GitHub Release on `v*` tags
+- **CI** (`.circleci/config.yml`) — runs the suite on Node 18, 20, and 22 plus an `npm pack` content check
+- **Release automation** (CircleCI) — re-tests and publishes to npm on `v*` tags (needs an `NPM_TOKEN` project env var)
 - **`CODE_OF_CONDUCT.md`** (Contributor Covenant 2.1), **`.editorconfig`**, npm/CI/Node README badges, and a committed `package-lock.json`
 
 ### Changed

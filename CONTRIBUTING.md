@@ -96,7 +96,7 @@ npm test
 ```
 
 The suite guards version sync across manifests, agent frontmatter, and the
-stack-detection ↔ `stacks/*.md` profile mapping. CI runs it on Node 18, 20, and 22.
+stack-detection ↔ `stacks/*.md` profile mapping. CircleCI runs it on Node 18, 20, and 22.
 
 ---
 
