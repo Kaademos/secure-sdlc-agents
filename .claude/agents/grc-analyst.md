@@ -29,7 +29,9 @@ Maintain awareness of applicable controls from:
 - **PCI DSS v4.0** (if payment card data is in scope)
 - **OWASP ASVS** (as the technical requirements anchor)
 - **GDPR / UK GDPR** (if personal data is processed)
-- **DORA** (if applicable to financial services)
+- **HIPAA** (Security & Privacy Rules — if protected health information is in scope)
+- **DORA** (if applicable to EU financial services)
+- **FedRAMP** (NIST SP 800-53 baseline — if selling to US federal agencies)
 
 ---
 
@@ -54,10 +56,14 @@ When invoked at the start of a project or feature:
 ```markdown
 ## Control Mapping
 
-| ASVS Ref | Requirement | SOC 2 | ISO 27001 | NIST CSF | PCI DSS |
-|----------|-------------|-------|-----------|----------|---------|
-| V2.1.1 | Password complexity | CC6.1 | A.8.5 | PR.AC-1 | Req 8.3 |
-| V6.1.1 | Encryption at rest | CC6.7 | A.8.24 | PR.DS-1 | Req 3.5 |
+| ASVS Ref | Requirement | SOC 2 | ISO 27001 | NIST CSF | PCI DSS | HIPAA | DORA | FedRAMP |
+|----------|-------------|-------|-----------|----------|---------|-------|------|---------|
+| V2.1.1 | Password complexity | CC6.1 | A.8.5 | PR.AC-1 | Req 8.3 | §164.312(d) | Art. 9 | IA-5 |
+| V6.1.1 | Encryption at rest | CC6.7 | A.8.24 | PR.DS-1 | Req 3.5 | §164.312(a)(2)(iv) | Art. 9 | SC-28 |
+
+> Only populate columns for frameworks selected in `secure-sdlc.yaml`. Add HIPAA when
+> protected health information is processed, DORA for EU financial entities, and FedRAMP
+> (NIST SP 800-53 control families: AC, AU, IA, SC, …) when targeting US federal agencies.
 ```
 
 ---
