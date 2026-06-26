@@ -163,12 +163,12 @@ export default async function init(options) {
   console.log(chalk.dim(`     secure-sdlc kickoff\n`));
 
   if (stack.name !== "unknown") {
-    const { getStackSecurityNotes } = await import("../utils/stack-detect.js");
+    const { getStackSecurityNotes, getStackProfile } = await import("../utils/stack-detect.js");
     const notes = getStackSecurityNotes(stack.name);
     if (notes.length) {
       console.log(chalk.bold(`\n${stack.display} security notes for your team:\n`));
       notes.slice(0, 3).forEach((n) => console.log(chalk.dim(`  • ${n}`)));
-      console.log(chalk.dim(`  (see stacks/${stack.name}.md for full guidance)\n`));
+      console.log(chalk.dim(`  (see stacks/${getStackProfile(stack.name)}.md for full guidance)\n`));
     }
   }
 }

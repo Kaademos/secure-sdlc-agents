@@ -80,9 +80,28 @@ export function detectStack(projectRoot) {
 }
 
 /**
+ * Maps a detected stack name to the stack that owns its security guidance.
+ * Framework variants (e.g. Gin/Echo/Fiber) share their language's profile and notes.
+ */
+const STACK_ALIASES = {
+  gin: "golang",
+  echo: "golang",
+  fiber: "golang",
+};
+
+/**
+ * Resolves the stack profile (notes key + stacks/<name>.md) for a detected stack.
+ * Falls back to the stack name itself when no alias applies.
+ */
+export function getStackProfile(stackName) {
+  return STACK_ALIASES[stackName] || stackName;
+}
+
+/**
  * Returns the top security considerations for a given stack.
  */
 export function getStackSecurityNotes(stackName) {
+  stackName = getStackProfile(stackName);
   const notes = {
     nextjs: [
       "Review Server Actions for CSRF and authorisation — they're POST endpoints by default",
@@ -119,6 +138,13 @@ export function getStackSecurityNotes(stackName) {
       "Rails 7+ uses encrypted credentials — use rails credentials:edit, never ENV vars for secrets in production",
       "Audit before_action filters for auth — ensure every controller action is covered",
       "Brakeman is the standard Rails SAST tool — run on every PR",
+    ],
+    golang: [
+      "Render HTML with html/template (context-aware escaping) — never text/template, and avoid template.HTML on user input",
+      "Use database/sql placeholders ($1/?) or GORM's ? conditions — never fmt.Sprintf user input into queries",
+      "CORS: set an explicit AllowedOrigins list — never combine wildcard/AllowAllOrigins with AllowCredentials:true",
+      "net/http ships no security headers — add CSP, HSTS, X-Content-Type-Options via middleware (e.g. unrolled/secure)",
+      "Run gosec (SAST) and govulncheck (vulnerable deps) in CI; hash passwords with bcrypt (cost ≥ 12) or argon2id",
     ],
     terraform: [
       "Pin provider versions with ~> constraints, not latest",
