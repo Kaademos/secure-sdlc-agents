@@ -249,13 +249,13 @@ client errors — never write `err.Error()` (which can leak DSNs, paths, SQL) in
 
 | ASVS Ref | Control | Go Implementation |
 |----------|---------|-------------------|
-| V5.1.3 | Input validation | `go-playground/validator` on bound structs |
-| V5.2.1 | Output encoding (XSS) | `html/template`; sanitise with `bluemonday` |
-| V5.3.4 | No SQL injection | `database/sql` placeholders; GORM `?` params |
-| V5.3.8 | No OS command injection | `exec.Command` with arg slices, no `sh -c` |
-| V2.4.1 | Password storage | `bcrypt` (cost ≥ 12) or `argon2id` |
-| V14.4.5 | CSRF | `gorilla/csrf` for cookie-based sessions |
-| V14.4.* | Security headers | `unrolled/secure` middleware |
+| V2.2.1 | Input validation | `go-playground/validator` on bound structs |
+| V1.3.1 | Output encoding (XSS) | `html/template`; sanitise with `bluemonday` |
+| V1.2.4 | No SQL injection | `database/sql` placeholders; GORM `?` params |
+| V1.2.5 | No OS command injection | `exec.Command` with arg slices, no `sh -c` |
+| V11.4.2 | Password storage | `bcrypt` (cost ≥ 12) or `argon2id` |
+| V3.5.1 | CSRF | `gorilla/csrf` for cookie-based sessions |
+| V4.1.1 | Security headers | `unrolled/secure` middleware |
 
 ---
 

@@ -32,13 +32,13 @@ claude --agent product-manager \
 **Output produced:** [`security-requirements.md`](security-requirements.md)
 
 **Key requirements generated:**
-- SR-001: Passwords stored using bcrypt with cost factor ≥ 12 (ASVS V2.4.1)
-- SR-002: Account lockout after 5 failed attempts, 15-minute lockout (ASVS V2.2.1)
-- SR-003: Login does not reveal whether username or password was incorrect (ASVS V2.5.4)
-- SR-004: TOTP-based MFA supported; backup codes generated and stored hashed (ASVS V2.8.3)
-- SR-005: Session tokens invalidated immediately on logout (ASVS V3.3.1)
-- SR-006: All auth events logged: timestamp, IP, user ID (hashed), outcome (ASVS V7.2.1)
-- SR-007: CSRF protection on login form submission (ASVS V4.2.2)
+- SR-001: Passwords stored using bcrypt with cost factor ≥ 12 (ASVS V11.4.2)
+- SR-002: Account lockout after 5 failed attempts, 15-minute lockout (ASVS V6.3.1)
+- SR-003: Login does not reveal whether username or password was incorrect (ASVS V6.3.2)
+- SR-004: TOTP-based MFA supported; backup codes generated and stored hashed (ASVS V6.5.3)
+- SR-005: Session tokens invalidated immediately on logout (ASVS V7.4.1)
+- SR-006: All auth events logged: timestamp, IP, user ID (hashed), outcome (ASVS V16.3.1)
+- SR-007: CSRF protection on login form submission (ASVS V3.5.1)
 
 ---
 

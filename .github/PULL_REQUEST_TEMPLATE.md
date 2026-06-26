@@ -22,7 +22,7 @@ If this PR changes security guidance in any agent file, please note:
 [Brief explanation]
 
 **Standard or reference supporting the change (if applicable):**
-[e.g. OWASP ASVS 4.0 V2.4.1, NIST SP 800-63B, CIS Benchmark]
+[e.g. OWASP ASVS 4.0 V11.4.2, NIST SP 800-63B, CIS Benchmark]
 
 ---
 
