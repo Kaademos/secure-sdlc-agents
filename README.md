@@ -334,6 +334,7 @@ Deep, framework-specific security guidance in `stacks/`:
 | Django | [`stacks/django.md`](stacks/django.md) — CSRF, strong params, ORM injection, production settings |
 | Express.js | [`stacks/express.md`](stacks/express.md) — helmet, rate limiting, CSRF, Zod validation |
 | Ruby on Rails | [`stacks/rails.md`](stacks/rails.md) — Brakeman, Pundit, strong parameters, credentials |
+| Go (net/http, Gin, Echo, Fiber) | [`stacks/golang.md`](stacks/golang.md) — html/template XSS, database/sql & GORM injection, CORS, gosec/govulncheck |
 
 ---
 
