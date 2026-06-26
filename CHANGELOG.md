@@ -6,6 +6,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.2.0] — 2026-06-26
+
+### Added
+- **Go stack profile** (`stacks/golang.md`) — dense, code-driven security guidance for Go (net/http, Gin, Echo, Fiber): `html/template` XSS, `database/sql`/GORM parameterisation, CORS, security headers, `gosec`/`govulncheck`
+- **Go security notes** in `getStackSecurityNotes()` plus a `getStackProfile()` resolver so detected `gin`/`echo`/`fiber` projects map to the `golang` profile and notes
+- **Worked example `04-oauth-flow`** — OAuth 2.0 / OIDC social login (authorization-code + PKCE); `redirect_uri` exact matching, `state` vs `nonce`, ID-token validation, anchored to ASVS 5.0 V10 and RFC 9700
+- **Worked example `05-payment-processing`** — redirect-based hosted checkout (PCI DSS SAQ A); webhook signature verification, idempotency, server-side amount, reflecting the Jan 2025 SAQ A changes
+- **HIPAA, DORA, and FedRAMP** control tables in `compliance-attestation.md` and the GRC agent's control-mapping example
+- **Automated test suite** (`test/`, Node built-in runner, zero new dependencies) — guards version sync across manifests, agent frontmatter, and the stack-detection ↔ `stacks/*.md` mapping
+- **CI workflow** (`.github/workflows/ci.yml`) — runs the suite on Node 18, 20, and 22 plus an `npm pack` content check
+- **Release workflow** (`.github/workflows/release.yml`) — publishes to npm with provenance and creates a GitHub Release on `v*` tags
+- **`CODE_OF_CONDUCT.md`** (Contributor Covenant 2.1), **`.editorconfig`**, npm/CI/Node README badges, and a committed `package-lock.json`
+
+### Changed
+- **CodeQL SAST** (`secure-sdlc-gate.yml`) — matrix expanded to `ruby`, `go`, and `java-kotlin`; per-language `build-mode` with toolchain setup so compiled-language scans are reliable on enterprise repos (pure-Java uses `build-mode: none`)
+- **ASVS references migrated from 4.0 to 5.0** repo-wide using the official OWASP `mapping_v4.0.3_to_v5.0.0` mapping (stack profiles, examples, agents, templates, skill, PR template)
+- **`secure-sdlc init`** only prints a `stacks/<name>.md` pointer when that profile actually ships
+
+### Fixed
+- Pre-existing CSRF control mislabel in the Django, Express, Rails, and Go stack profiles (`V14.4.5`/HSTS → real CSRF control `V3.5.1`)
+- Broken `stacks/<gin|echo|fiber>.md` reference — Go framework projects now resolve to `stacks/golang.md`
+
+---
+
 ## [1.0.2]
 
 ---

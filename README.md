@@ -1,7 +1,8 @@
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Claude Code](https://img.shields.io/badge/Claude_Code-Sub--Agents-blueviolet)
-![Cursor MCP](https://img.shields.io/badge/Cursor-MCP%20Ready-blue)
-![OWASP ASVS](https://img.shields.io/badge/OWASP-ASVS%20L2-orange)
+[![CI](https://github.com/Kaademos/secure-sdlc-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/Kaademos/secure-sdlc-agents/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@kaademos/secure-sdlc?logo=npm)](https://www.npmjs.com/package/@kaademos/secure-sdlc)
+[![node](https://img.shields.io/node/v/@kaademos/secure-sdlc)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+![OWASP ASVS](https://img.shields.io/badge/OWASP-ASVS%205.0-orange)
 ![Works With](https://img.shields.io/badge/Works%20With-Claude%20%7C%20Cursor%20%7C%20Windsurf%20%7C%20Warp-brightgreen)
 
 # Secure SDLC Agents

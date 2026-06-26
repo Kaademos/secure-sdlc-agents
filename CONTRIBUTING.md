@@ -84,6 +84,19 @@ Templates in `docs/templates/` should:
 
 Be respectful. Security is a serious discipline and this project is intended to help teams
 do it better. Disagreements about security guidance should be constructive and evidence-based.
+By participating, you agree to uphold our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Running the tests
+
+The project ships a dependency-free test suite (Node's built-in runner). Before opening a PR:
+
+```bash
+npm install   # or: npm ci
+npm test
+```
+
+The suite guards version sync across manifests, agent frontmatter, and the
+stack-detection ↔ `stacks/*.md` profile mapping. CI runs it on Node 18, 20, and 22.
 
 ---
 

@@ -168,7 +168,12 @@ export default async function init(options) {
     if (notes.length) {
       console.log(chalk.bold(`\n${stack.display} security notes for your team:\n`));
       notes.slice(0, 3).forEach((n) => console.log(chalk.dim(`  • ${n}`)));
-      console.log(chalk.dim(`  (see stacks/${getStackProfile(stack.name)}.md for full guidance)\n`));
+      // Only point to a profile that actually ships — avoids a broken reference
+      // for stacks that have notes but no dedicated stacks/<name>.md (e.g. terraform).
+      const profile = getStackProfile(stack.name);
+      if (existsSync(join(REPO_ROOT, "stacks", `${profile}.md`))) {
+        console.log(chalk.dim(`  (see stacks/${profile}.md for full guidance)\n`));
+      }
     }
   }
 }
