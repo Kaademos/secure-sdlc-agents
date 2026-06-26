@@ -3,7 +3,7 @@
 **Release version:** v[X.Y.Z]
 **Date:** [YYYY-MM-DD]
 **Author:** GRC Analyst Agent + [Human GRC lead]
-**Frameworks in scope:** [SOC 2 / ISO 27001 / NIST CSF / PCI DSS / GDPR — delete inapplicable]
+**Frameworks in scope:** [SOC 2 / ISO 27001 / NIST CSF / PCI DSS / GDPR / HIPAA / DORA / FedRAMP — delete inapplicable]
 **Status:** Draft / Review / Approved
 
 ---
@@ -107,6 +107,45 @@ ISO/IEC 27001:2022 Annex A, NIST CSF 2.0]
 | Art. 25 | Data protection by design and by default | | | |
 | Art. 32 | Security of processing | | | |
 | Art. 33/34 | Breach notification capability | | | |
+
+---
+
+### HIPAA *(complete only if protected health information (PHI) is in scope)*
+
+| Standard / Rule | Safeguard | Status | Evidence Reference | Notes |
+|-----------------|-----------|--------|--------------------|-------|
+| §164.308(a)(1) | Security Rule — Security management process (risk analysis) | ✅ Met / ⚠️ Gap / 🚫 Fail | | |
+| §164.312(a)(1) | Security Rule — Access control (technical safeguards) | | | |
+| §164.312(b) | Security Rule — Audit controls | | | |
+| §164.312(e)(1) | Security Rule — Transmission security (encryption in transit) | | | |
+| §164.502(b) | Privacy Rule — Minimum necessary use and disclosure | | | |
+
+*Extend with additional Security/Privacy Rule standards (e.g. §164.308 administrative, §164.310 physical) relevant to the systems in scope.*
+
+---
+
+### DORA *(complete only if an EU financial entity or critical ICT third-party provider)*
+
+| Article / Pillar | Requirement | Status | Evidence Reference | Notes |
+|------------------|-------------|--------|--------------------|-------|
+| Art. 5–15 | ICT risk management framework | ✅ Met / ⚠️ Gap / 🚫 Fail | | |
+| Art. 17–23 | ICT-related incident management, classification & reporting | | | |
+| Art. 24–27 | Digital operational resilience testing (incl. TLPT) | | | |
+| Art. 28–30 | ICT third-party risk management | | | |
+
+---
+
+### FedRAMP *(complete only if selling to US federal agencies — NIST SP 800-53 baseline)*
+
+| Control Family | Control | Status | Evidence Reference | Notes |
+|----------------|---------|--------|--------------------|-------|
+| AC — Access Control | AC-2 Account management | ✅ Met / ⚠️ Gap / 🚫 Fail | | |
+| AU — Audit & Accountability | AU-2 Event logging | | | |
+| IA — Identification & Authentication | IA-2 Identification and authentication (organisational users) | | | |
+| SC — System & Communications Protection | SC-7 Boundary protection | | | |
+| SC — System & Communications Protection | SC-28 Protection of information at rest | | | |
+
+*Select the impact baseline (Low / Moderate / High) and extend with the corresponding 800-53 control families (CM, CP, IR, RA, SI, …).*
 
 ---
 
