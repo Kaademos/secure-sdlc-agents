@@ -98,6 +98,8 @@ npm test
 The suite guards version sync across manifests, agent frontmatter, and the
 stack-detection ↔ `stacks/*.md` profile mapping. CircleCI runs it on Node 18, 20, and 22.
 
+Maintainers: see [RELEASING.md](RELEASING.md) for how to cut a release.
+
 ---
 
 ## Reporting security issues in this project
