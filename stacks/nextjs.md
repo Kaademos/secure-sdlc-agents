@@ -164,12 +164,12 @@ export async function createPost(formData: FormData) {
 
 | ASVS Ref | Control | Next.js Implementation |
 |----------|---------|----------------------|
-| V4.1.1 | Authentication on all endpoints | `getServerSession()` in every route handler and Server Action |
-| V4.2.1 | Object-level authorisation | Check `resource.userId === session.user.id` before returning/modifying |
-| V5.1.3 | Input validation | Zod schemas on all Server Action inputs |
-| V7.1.1 | Log security events | Log auth events in NextAuth callbacks |
-| V9.1.1 | TLS everywhere | Enforced by Vercel/host; add HSTS header |
-| V14.4.1 | Security headers | `securityHeaders` in next.config.js |
+| V8.3.1 | Authentication on all endpoints | `getServerSession()` in every route handler and Server Action |
+| V8.2.2 | Object-level authorisation | Check `resource.userId === session.user.id` before returning/modifying |
+| V2.2.1 | Input validation | Zod schemas on all Server Action inputs |
+| V16.2.5 | Log security events | Log auth events in NextAuth callbacks |
+| V12.2.1 | TLS everywhere | Enforced by Vercel/host; add HSTS header |
+| V4.1.1 | Security headers | `securityHeaders` in next.config.js |
 
 ---
 

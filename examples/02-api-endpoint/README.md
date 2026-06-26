@@ -38,14 +38,14 @@ claude --agent product-manager \
 
 | ID | Requirement | ASVS Ref | Priority |
 |----|-------------|----------|----------|
-| SR-001 | All requests require a valid JWT; 401 returned for missing or invalid tokens | V4.1.1 | MUST |
-| SR-002 | Users may only retrieve their own profile; 403 returned for cross-user access | V4.2.1 | MUST |
-| SR-003 | Rate limiting applied: 60 requests/minute per authenticated user | V13.2.5 | MUST |
-| SR-004 | API returns only fields necessary for the profile view; no PII over-exposure | V8.3.1 | MUST |
-| SR-005 | `{id}` path parameter validated as UUID format before database query | V5.1.3 | MUST |
-| SR-006 | 404 returned for non-existent IDs (not 403) — avoids confirming whether a user exists | V8.3.4 | SHOULD |
-| SR-007 | All API requests logged: timestamp, endpoint, user ID (hashed), response code, latency | V7.2.2 | MUST |
-| SR-008 | API versioning in place; old versions have defined deprecation timeline | V13.2.1 | SHOULD |
+| SR-001 | All requests require a valid JWT; 401 returned for missing or invalid tokens | V8.3.1 | MUST |
+| SR-002 | Users may only retrieve their own profile; 403 returned for cross-user access | V8.2.2 | MUST |
+| SR-003 | Rate limiting applied: 60 requests/minute per authenticated user | V3.5.2 | MUST |
+| SR-004 | API returns only fields necessary for the profile view; no PII over-exposure | V14.2.1 | MUST |
+| SR-005 | `{id}` path parameter validated as UUID format before database query | V2.2.1 | MUST |
+| SR-006 | 404 returned for non-existent IDs (not 403) — avoids confirming whether a user exists | V14.1.1 | SHOULD |
+| SR-007 | All API requests logged: timestamp, endpoint, user ID (hashed), response code, latency | V16.3.2 | MUST |
+| SR-008 | API versioning in place; old versions have defined deprecation timeline | V3.5.3 | SHOULD |
 
 **GRC note from product-manager:** SR-002 and SR-004 flagged to `grc-analyst` as they relate
 to SOC 2 CC6.1 (access control) and GDPR Art. 5(1)(c) (data minimisation).

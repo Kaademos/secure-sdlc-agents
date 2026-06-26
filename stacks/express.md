@@ -204,12 +204,12 @@ const user = await prisma.user.findUnique({ where: { id: userId } });
 
 | ASVS Ref | Control | Express Implementation |
 |----------|---------|----------------------|
-| V4.1.1 | Auth middleware | passport.js + per-route authentication middleware |
-| V4.2.1 | Object-level auth | Ownership check in every route handler |
-| V5.1.3 | Input validation | Zod validation middleware |
-| V13.2.5 | Rate limiting | express-rate-limit per endpoint |
-| V14.4.1 | Security headers | helmet() |
-| V14.4.5 | CSRF | csrf-csrf or csurf |
+| V8.3.1 | Auth middleware | passport.js + per-route authentication middleware |
+| V8.2.2 | Object-level auth | Ownership check in every route handler |
+| V2.2.1 | Input validation | Zod validation middleware |
+| V3.5.2 | Rate limiting | express-rate-limit per endpoint |
+| V4.1.1 | Security headers | helmet() |
+| V3.5.1 | CSRF | csrf-csrf or csurf |
 
 ---
 

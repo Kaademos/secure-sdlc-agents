@@ -116,7 +116,7 @@ Priority list of mitigations to carry into the build phase:
 
 | Priority | Threat ID(s) | Mitigation | Owner | ASVS Ref |
 |----------|-------------|------------|-------|----------|
-| 1 | T-001, T-004 | Implement account lockout and generic error responses | Dev Lead | V2.2.1, V8.3.4 |
+| 1 | T-001, T-004 | Implement account lockout and generic error responses | Dev Lead | V6.3.1, V14.1.1 |
 | 2 | | | | |
 
 ---

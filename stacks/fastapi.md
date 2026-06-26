@@ -224,12 +224,12 @@ settings = Settings()
 
 | ASVS Ref | Control | FastAPI Implementation |
 |----------|---------|----------------------|
-| V4.1.1 | Auth on all endpoints | `Depends(get_current_user)` on every protected endpoint |
-| V4.2.1 | Object-level authorisation | `resource.owner_id == current_user.id` check |
-| V5.1.3 | Input validation | Pydantic models with `Field` constraints |
-| V8.3.4 | Don't confirm resource existence | Return 404 (not 403) for resources the user can't see |
-| V13.2.5 | Rate limiting | slowapi or similar |
-| V14.4.1 | Security headers | Add `SecurityHeadersMiddleware` |
+| V8.3.1 | Auth on all endpoints | `Depends(get_current_user)` on every protected endpoint |
+| V8.2.2 | Object-level authorisation | `resource.owner_id == current_user.id` check |
+| V2.2.1 | Input validation | Pydantic models with `Field` constraints |
+| V14.1.1 | Don't confirm resource existence | Return 404 (not 403) for resources the user can't see |
+| V3.5.2 | Rate limiting | slowapi or similar |
+| V4.1.1 | Security headers | Add `SecurityHeadersMiddleware` |
 
 ---
 

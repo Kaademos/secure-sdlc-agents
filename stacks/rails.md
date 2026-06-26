@@ -225,12 +225,12 @@ session fixation, and many other Rails-specific issues.
 
 | ASVS Ref | Control | Rails Implementation |
 |----------|---------|---------------------|
-| V2.1.1 | Password complexity | Devise validates :password strength |
-| V2.2.1 | Account lockout | Devise :lockable |
-| V4.1.1 | Auth on all actions | `before_action :authenticate_user!` |
-| V4.2.1 | Object-level auth | Pundit policies with `authorize @resource` |
-| V5.3.4 | No SQL injection | ActiveRecord ORM; never string-interpolate in where() |
-| V14.4.5 | CSRF | `protect_from_forgery` (default) |
+| V6.2.1 | Password complexity | Devise validates :password strength |
+| V6.3.1 | Account lockout | Devise :lockable |
+| V8.3.1 | Auth on all actions | `before_action :authenticate_user!` |
+| V8.2.2 | Object-level auth | Pundit policies with `authorize @resource` |
+| V1.2.4 | No SQL injection | ActiveRecord ORM; never string-interpolate in where() |
+| V3.5.1 | CSRF | `protect_from_forgery` (default) |
 
 ---
 

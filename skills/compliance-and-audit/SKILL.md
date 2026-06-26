@@ -66,9 +66,9 @@ Produce a control mapping table that connects ASVS requirements to applicable fr
 ```markdown
 | ASVS Ref | Requirement | SOC 2 | ISO 27001 | NIST CSF | PCI DSS |
 |----------|-------------|-------|-----------|----------|---------| 
-| V2.1.1 | Password complexity ≥ 12 chars | CC6.1 | A.8.5 | PR.AC-1 | Req 8.3 |
-| V6.1.1 | Encryption at rest (AES-256) | CC6.7 | A.8.24 | PR.DS-1 | Req 3.5 |
-| V9.1.1 | TLS 1.2+ for all external comms | CC6.7 | A.8.20 | PR.DS-2 | Req 4.2 |
+| V6.2.1 | Password complexity ≥ 12 chars | CC6.1 | A.8.5 | PR.AC-1 | Req 8.3 |
+| V14.1.1 | Encryption at rest (AES-256) | CC6.7 | A.8.24 | PR.DS-1 | Req 3.5 |
+| V12.2.1 | TLS 1.2+ for all external comms | CC6.7 | A.8.20 | PR.DS-2 | Req 4.2 |
 ```
 
 ### Step 4 — Collect audit evidence at time of implementation

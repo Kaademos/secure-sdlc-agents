@@ -45,13 +45,13 @@ claude --agent product-manager \
 |----|-------------|-----------|----------|
 | SR-001 | Cardholder data is **never** transmitted to, processed by, or stored on merchant servers — payment is fully outsourced via redirect to the PSP-hosted page | PCI DSS SAQ A eligibility | MUST |
 | SR-002 | Use a **redirect** to the hosted payment page (not an embedded iframe) to avoid the 2025 SAQ A script-attack eligibility criterion | PCI SSC SAQ A 2025 | MUST |
-| SR-003 | The charge **amount and currency are set server-side** from the catalogue/order — never read from the client | PCI DSS 6.2.4 / ASVS V5.1.1 | MUST |
+| SR-003 | The charge **amount and currency are set server-side** from the catalogue/order — never read from the client | PCI DSS 6.2.4 / ASVS V15.3.7 | MUST |
 | SR-004 | Order fulfilment is triggered **only** by a webhook whose signature is verified against the PSP signing secret | PCI DSS 6.2.4 | MUST |
-| SR-005 | Webhook handling is **idempotent** — a replayed or duplicated event fulfils the order at most once | ASVS V11.1.4 | MUST |
-| SR-006 | `success_url` / `cancel_url` validated against a server-side allow-list (no open redirect) | ASVS V5.1.5 | MUST |
+| SR-005 | Webhook handling is **idempotent** — a replayed or duplicated event fulfils the order at most once | ASVS V2.4.1 | MUST |
+| SR-006 | `success_url` / `cancel_url` validated against a server-side allow-list (no open redirect) | ASVS V3.7.2 | MUST |
 | SR-007 | No PAN, CVV, full track, or `client_secret` is ever written to logs, error messages, or analytics | PCI DSS 3.3 / 3.4 | MUST |
-| SR-008 | PSP API keys stored in a secrets manager; **restricted** keys used (least privilege), secret keys never shipped to the browser | PCI DSS 8.6 / ASVS V2.10 | MUST |
-| SR-009 | Order/payment status endpoints enforce object-level authorisation (no IDOR on another user's order) | ASVS V4.2.1 | MUST |
+| SR-008 | PSP API keys stored in a secrets manager; **restricted** keys used (least privilege), secret keys never shipped to the browser | PCI DSS 8.6 / ASVS V13.3.1 | MUST |
+| SR-009 | Order/payment status endpoints enforce object-level authorisation (no IDOR on another user's order) | ASVS V8.2.2 | MUST |
 | SR-010 | Payment events logged (order ID, PSP event ID, amount, outcome) — without any cardholder data | PCI DSS 10.2 | MUST |
 
 **Product-manager note:** SR-001/SR-002 are the *scoping* requirements and must be settled

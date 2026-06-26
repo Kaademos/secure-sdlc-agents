@@ -13,7 +13,7 @@ confusion, storage misconfiguration, and denial-of-service risk in a single surf
 
 ## What this example shows
 
-- How the `product-manager` agent handles file-upload-specific ASVS controls (V12)
+- How the `product-manager` agent handles file-upload-specific ASVS controls (V5 — File Handling)
 - How the `appsec-engineer` agent threat models a file upload and storage flow
 - How the `cloud-platform-engineer` agent reviews S3 bucket policy and CloudFront config
 - How the `dev-lead` agent catches a content-type trust vulnerability in PR review
@@ -37,16 +37,16 @@ claude --agent product-manager \
 
 | ID | Requirement | ASVS Ref | Priority |
 |----|-------------|----------|----------|
-| SR-001 | File type validated by content inspection (magic bytes), not only MIME type or extension | V12.1.1 | MUST |
-| SR-002 | Accepted formats: JPEG, PNG, WebP only. All others rejected with 400 | V12.1.2 | MUST |
-| SR-003 | Maximum file size enforced server-side at 5MB; client-side limit is UX only | V12.1.3 | MUST |
-| SR-004 | Uploaded files stored with a random, non-guessable filename — never the original name | V12.3.1 | MUST |
-| SR-005 | Files stored in a private S3 bucket; served via pre-signed URLs or CloudFront with signed cookies | V12.3.3 | MUST |
-| SR-006 | Uploaded files served from a separate domain or subdomain to prevent same-origin attacks | V12.3.4 | MUST |
-| SR-007 | Malware scanning performed before file is made accessible to other users | V12.2.1 | MUST |
-| SR-008 | Image files re-encoded server-side before storage to strip embedded metadata and payloads | V12.1.1 | SHOULD |
-| SR-009 | Upload rate limiting: max 10 uploads per user per hour | V12.1.4 | MUST |
-| SR-010 | Audit log: file upload events logged with user ID (hashed), file hash, timestamp, outcome | V7.2.1 | MUST |
+| SR-001 | File type validated by content inspection (magic bytes), not only MIME type or extension | V5.2.1 | MUST |
+| SR-002 | Accepted formats: JPEG, PNG, WebP only. All others rejected with 400 | V5.2.3 | MUST |
+| SR-003 | Maximum file size enforced server-side at 5MB; client-side limit is UX only | V5.2.4 | MUST |
+| SR-004 | Uploaded files stored with a random, non-guessable filename — never the original name | V5.3.2 | MUST |
+| SR-005 | Files stored in a private S3 bucket; served via pre-signed URLs or CloudFront with signed cookies | V5.3.2 | MUST |
+| SR-006 | Uploaded files served from a separate domain or subdomain to prevent same-origin attacks | V5.4.1 | MUST |
+| SR-007 | Malware scanning performed before file is made accessible to other users | V5.2.2 | MUST |
+| SR-008 | Image files re-encoded server-side before storage to strip embedded metadata and payloads | V5.2.1 | SHOULD |
+| SR-009 | Upload rate limiting: max 10 uploads per user per hour | V2.4.1 | MUST |
+| SR-010 | Audit log: file upload events logged with user ID (hashed), file hash, timestamp, outcome | V16.3.1 | MUST |
 
 **Product-manager note:** SR-007 (malware scanning) and SR-008 (re-encoding) flagged as
 dependencies — if not in place at launch, CRITICAL risk. Escalated to `appsec-engineer`
@@ -228,7 +228,7 @@ confirmed operational, GRC attestation produced.
 
 | File | Produced by | Description |
 |------|-------------|-------------|
-| `security-requirements.md` | product-manager | ASVS V12 requirements for file upload |
+| `security-requirements.md` | product-manager | ASVS V5 (File Handling) requirements for file upload |
 | `risk-register.md` | grc-analyst | Malware, path traversal, storage misconfiguration risks |
 | `threat-model.md` | appsec-engineer | STRIDE — SVG XSS and polyglot file as top threats |
 | `infra-security-review.md` | cloud-platform-engineer | S3, CloudFront, Lambda IAM review |

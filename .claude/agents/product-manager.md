@@ -51,9 +51,9 @@ For each feature, produce a `docs/security-requirements.md` using this structure
 
 | ID | Requirement | ASVS Ref | Priority | Acceptance Criteria |
 |----|-------------|----------|----------|---------------------|
-| SR-001 | All API endpoints require authentication | V4.1.1 | MUST | Unauthenticated requests return HTTP 401 |
-| SR-002 | Passwords must meet complexity requirements | V2.1.1 | MUST | Passwords < 8 chars or common passwords rejected |
-| SR-003 | Sensitive data encrypted at rest | V6.1.1 | MUST | AES-256 or equivalent; key management documented |
+| SR-001 | All API endpoints require authentication | V8.3.1 | MUST | Unauthenticated requests return HTTP 401 |
+| SR-002 | Passwords must meet complexity requirements | V6.2.1 | MUST | Passwords < 8 chars or common passwords rejected |
+| SR-003 | Sensitive data encrypted at rest | V14.1.1 | MUST | AES-256 or equivalent; key management documented |
 
 ### Privacy Requirements
 - [ ] Data minimisation: only collect fields required for this feature

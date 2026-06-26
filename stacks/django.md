@@ -194,13 +194,13 @@ DATABASE_URL = env('DATABASE_URL')
 
 | ASVS Ref | Control | Django Implementation |
 |----------|---------|----------------------|
-| V2.1.1 | Password complexity | `AUTH_PASSWORD_VALIDATORS` |
-| V3.3.1 | Session invalidation on logout | `django.contrib.auth.logout()` clears session |
-| V4.1.1 | Auth on endpoints | `@login_required` / `permission_classes` |
-| V4.2.1 | Object-level auth | Explicit ownership checks before returning objects |
-| V5.3.4 | No SQL injection | Use ORM; avoid `.raw()` with user input |
-| V14.4.1 | Security headers | Django SecurityMiddleware |
-| V14.4.5 | CSRF | CsrfViewMiddleware (enabled by default) |
+| V6.2.1 | Password complexity | `AUTH_PASSWORD_VALIDATORS` |
+| V7.4.1 | Session invalidation on logout | `django.contrib.auth.logout()` clears session |
+| V8.3.1 | Auth on endpoints | `@login_required` / `permission_classes` |
+| V8.2.2 | Object-level auth | Explicit ownership checks before returning objects |
+| V1.2.4 | No SQL injection | Use ORM; avoid `.raw()` with user input |
+| V4.1.1 | Security headers | Django SecurityMiddleware |
+| V3.5.1 | CSRF | CsrfViewMiddleware (enabled by default) |
 
 ---
 
