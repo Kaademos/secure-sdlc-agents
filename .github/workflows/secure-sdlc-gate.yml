@@ -241,7 +241,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['javascript-typescript', 'python']
+        language: ['javascript-typescript', 'python', 'ruby', 'go', 'java-kotlin']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -250,25 +250,64 @@ jobs:
         id: check-lang
         run: |
           LANG="${{ matrix.language }}"
+          # EXISTS gates every downstream step so absent languages skip cleanly.
+          # BUILD_MODE tells CodeQL how to build: interpreted languages need no
+          # build ("none"); Go must be built ("autobuild"); java-kotlin can use
+          # "none" for pure-Java repos but MUST build when Kotlin is present
+          # (Kotlin analysis has no build-mode: none support).
+          EXISTS=false
+          BUILD_MODE=none
           if [ "$LANG" = "javascript-typescript" ]; then
-            find . -name "*.js" -o -name "*.ts" | grep -v node_modules | grep -q . && echo "EXISTS=true" >> $GITHUB_OUTPUT || echo "EXISTS=false" >> $GITHUB_OUTPUT
+            find . -name "*.js" -o -name "*.ts" | grep -v node_modules | grep -q . && EXISTS=true
           elif [ "$LANG" = "python" ]; then
-            find . -name "*.py" | grep -q . && echo "EXISTS=true" >> $GITHUB_OUTPUT || echo "EXISTS=false" >> $GITHUB_OUTPUT
+            find . -name "*.py" | grep -q . && EXISTS=true
+          elif [ "$LANG" = "ruby" ]; then
+            find . -name "*.rb" | grep -q . && EXISTS=true
+          elif [ "$LANG" = "go" ]; then
+            find . -name "*.go" | grep -q . && EXISTS=true
+            BUILD_MODE=autobuild
+          elif [ "$LANG" = "java-kotlin" ]; then
+            find . -name "*.java" -o -name "*.kt" | grep -q . && EXISTS=true
+            # Kotlin requires a build; pure-Java repos skip it for reliability.
+            if find . -name "*.kt" | grep -q .; then
+              BUILD_MODE=autobuild
+            fi
           else
-            echo "EXISTS=true" >> $GITHUB_OUTPUT
+            EXISTS=true
           fi
+          echo "EXISTS=$EXISTS" >> $GITHUB_OUTPUT
+          echo "BUILD_MODE=$BUILD_MODE" >> $GITHUB_OUTPUT
+          echo "Language=$LANG Exists=$EXISTS BuildMode=$BUILD_MODE"
+
+      # Set up the toolchain BEFORE CodeQL so autobuild can resolve the build.
+      # Without a matching toolchain, autobuild is the #1 cause of CodeQL CI
+      # failures on enterprise Go/Maven/Gradle projects.
+      - name: Set up Go
+        if: steps.check-lang.outputs.EXISTS == 'true' && matrix.language == 'go'
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false  # no go.sum path assumptions; CodeQL only needs a build
+
+      - name: Set up JDK
+        if: steps.check-lang.outputs.EXISTS == 'true' && matrix.language == 'java-kotlin' && steps.check-lang.outputs.BUILD_MODE == 'autobuild'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # Latest LTS. If your project targets an older JDK (11/17) and the
+          # build fails, change this to match — that's the one knob to turn.
+          java-version: '21'
 
       - name: Initialize CodeQL
         if: steps.check-lang.outputs.EXISTS == 'true'
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ steps.check-lang.outputs.BUILD_MODE }}
           queries: security-and-quality
 
-      - name: Autobuild
-        if: steps.check-lang.outputs.EXISTS == 'true'
-        uses: github/codeql-action/autobuild@v3
-
+      # No standalone Autobuild step: build-mode "autobuild" runs the autobuilder
+      # during analysis, and build-mode "none" needs no build at all.
       - name: Perform CodeQL Analysis
         if: steps.check-lang.outputs.EXISTS == 'true'
         uses: github/codeql-action/analyze@v3
