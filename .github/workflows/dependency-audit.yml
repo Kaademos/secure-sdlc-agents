@@ -1,0 +1,61 @@
+name: Dependency Audit
+
+# Runs `npm audit` against the committed lockfile.
+#
+# WHY THIS IS SEPARATE FROM pr-checks.yml:
+# A pull-request-only audit would not have caught GHSA-4c8g-83qw-93j6 /
+# GHSA-v2hh-gcrm-f6hx (fast-uri, fixed in v1.3.1). That advisory was published
+# against a dependency tree nobody had touched — there was no PR to attach a
+# check to, so an outside contributor found it before we did. The `schedule`
+# trigger below is the part that actually closes that gap; the `pull_request`
+# trigger just stops a PR from introducing something new.
+#
+# GATE LEVEL: `high`. Gating at `moderate` would fail today on
+# GHSA-frvp-7c67-39w9 (@hono/node-server serve-static path traversal), which is
+# not reachable here — the MCP server is stdio-only and never imports hono — and
+# which cannot be patched without forcing a major version outside the range
+# @modelcontextprotocol/sdk declares. Moderates are still printed, just not
+# fatal. Revisit the level once that one clears.
+#
+# NOTE: repository CI, not shipped to end users. package.json `files` includes
+# only .github/workflows/secure-sdlc-gate.yml, which is the product template.
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    # Mondays, 09:00 UTC. Scheduled runs only fire on the default branch, and
+    # GitHub disables them after 60 days without repository activity.
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+
+      # --package-lock-only resolves advisories straight from the committed
+      # lockfile, so no dependency is installed or executed to run the audit.
+      - name: Report all advisories
+        run: npm audit --package-lock-only || true
+
+      - name: Fail on high or critical advisories
+        run: npm audit --audit-level=high --package-lock-only
