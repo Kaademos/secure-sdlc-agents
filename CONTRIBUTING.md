@@ -92,11 +92,21 @@ The project ships a dependency-free test suite (Node's built-in runner). Before 
 
 ```bash
 npm install   # or: npm ci
-npm test
+npm run ci    # runs `npm test` + `npm run test:pack` — the same two steps CircleCI runs
 ```
 
+Use `npm run ci` rather than `npm test` alone: CircleCI also verifies the published package
+contents, so a change that ships a file without listing it in `package.json` `files` passes
+`npm test` locally and still fails CI.
+
 The suite guards version sync across manifests, agent frontmatter, and the
-stack-detection ↔ `stacks/*.md` profile mapping. CircleCI runs it on Node 18, 20, and 22.
+stack-detection ↔ `stacks/*.md` profile mapping. It runs on Node 18, 20, and 22 —
+`engines.node` is `>=18`, so avoid syntax newer than that.
+
+Every pull request, including one opened from a fork, is checked automatically by
+[`.github/workflows/pr-checks.yml`](.github/workflows/pr-checks.yml) on the same Node
+matrix. CircleCI (`.circleci/config.yml`) covers pushes to `main` and release tags.
+If your PR is red, run `npm run ci` locally to reproduce it before pushing a fix.
 
 Maintainers: see [RELEASING.md](RELEASING.md) for how to cut a release.
 

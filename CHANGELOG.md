@@ -6,6 +6,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.3.0] — 2026-07-22
+
+### Added
+- **Spring Boot stack profile** (`stacks/spring-boot.md`) — code-driven security guidance for Spring Boot 3.x / Spring Security 6.x on Java 17+ and Kotlin: Actuator exposure (`/heapdump`, `/env`), filter-chain matcher ordering, `@EnableMethodSecurity`, JPQL/`JdbcTemplate` injection, SpEL injection, mass assignment, Jackson polymorphic deserialisation, Thymeleaf XSS/SSTI, and `allowedOriginPatterns("*")` CORS
+- **Spring Boot security notes** in `getStackSecurityNotes()`, so `secure-sdlc init` and `kickoff` no longer fall back to generic guidance on Spring projects
+- **Test guard** — every shipped `stacks/*.md` must return stack-specific notes rather than the generic fallback, closing the gap that allowed a detectable stack to ship with no guidance behind it
+- **Pull request CI** (`.github/workflows/pr-checks.yml`) — runs the same `npm test` + `npm run test:pack` steps as CircleCI on Node 18/20/22 for every PR **including forks**, which CircleCI skips unless "Build forked pull requests" is enabled. Least-privilege `contents: read` token, actions pinned to full commit SHAs
+- **`npm run ci`** — runs the same two commands CircleCI does, so a change that passes locally passes in CI
+
+### Fixed
+- **Gradle Spring Boot projects were never detected** — `build.gradle`/`build.gradle.kts` always resolved to `java`, so Kotlin and Gradle-based Spring Boot services could not reach the Spring Boot profile. Detection now reads the Gradle build files and matches the `org.springframework.boot` plugin as well as Maven's `spring-boot-starter-*` artifacts
+- **`package-lock.json` version drift** — the lockfile was left at `1.1.0` through the 1.2.0 release because the manifests were bumped by hand; it is now back in step with `package.json`
+
+---
+
 ## [1.2.0] — 2026-06-26
 
 ### Added

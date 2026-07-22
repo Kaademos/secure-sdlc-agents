@@ -1,6 +1,6 @@
 {
   "name": "@kaademos/secure-sdlc",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Secure SDLC agent team — CLI to scaffold docs, hooks, CI, and MCP-ready security workflows",
   "type": "module",
   "bin": {
@@ -30,7 +30,8 @@
     "prepack": "node cli/bin/secure-sdlc.js --version",
     "sdlc": "node cli/bin/secure-sdlc.js",
     "test": "node --test test/*.test.js",
-    "test:pack": "npm pack --dry-run --ignore-scripts 2>&1"
+    "test:pack": "npm pack --dry-run --ignore-scripts 2>&1",
+    "ci": "npm test && npm run test:pack"
   },
   "keywords": [
     "security",

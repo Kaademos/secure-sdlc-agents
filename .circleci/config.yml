@@ -6,6 +6,10 @@ version: 2.1
 #
 # NOTE: .github/workflows/secure-sdlc-gate.yml is intentionally NOT migrated — it
 # is a product template shipped to end users and uses GitHub-native CodeQL.
+#
+# NOTE: .github/workflows/pr-checks.yml runs these same steps on pull requests.
+# CircleCI skips fork PRs unless "Build forked pull requests" is enabled in Project
+# Settings → Advanced, so fork contributions would otherwise report zero checks.
 
 orbs:
   node: circleci/node@5
@@ -27,6 +31,8 @@ jobs:
       - run:
           name: Install dependencies
           command: npm ci
+      # Kept as separate steps for readable failure output. Contributors run the same
+      # two commands locally via `npm run ci` — keep the three in sync.
       - run:
           name: Run tests
           command: npm test

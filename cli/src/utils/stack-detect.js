@@ -60,13 +60,19 @@ export function detectStack(projectRoot) {
   }
 
   // Java / Kotlin / JVM
-  if (has("pom.xml")) {
-    const pom = readFileSync(join(projectRoot, "pom.xml"), "utf-8");
-    if (pom.includes("spring-boot")) return { name: "spring-boot", display: "Spring Boot", language: "Java/Kotlin" };
-    return { name: "java", display: "Java", language: "Java" };
-  }
-  if (has("build.gradle") || has("build.gradle.kts")) {
-    return { name: "java", display: "Gradle/JVM", language: "Java/Kotlin" };
+  if (has("pom.xml") || has("build.gradle") || has("build.gradle.kts")) {
+    const buildFiles = ["pom.xml", "build.gradle", "build.gradle.kts"].map(f =>
+      has(f) ? readFileSync(join(projectRoot, f), "utf-8") : ""
+    ).join("\n");
+
+    // Maven declares spring-boot-starter-* artifacts; Gradle applies the
+    // org.springframework.boot plugin, which the "spring-boot" substring misses.
+    if (buildFiles.includes("spring-boot") || buildFiles.includes("springframework.boot")) {
+      return { name: "spring-boot", display: "Spring Boot", language: "Java/Kotlin" };
+    }
+    return has("pom.xml")
+      ? { name: "java", display: "Java",       language: "Java" }
+      : { name: "java", display: "Gradle/JVM", language: "Java/Kotlin" };
   }
 
   // Rust
@@ -145,6 +151,14 @@ export function getStackSecurityNotes(stackName) {
       "CORS: set an explicit AllowedOrigins list — never combine wildcard/AllowAllOrigins with AllowCredentials:true",
       "net/http ships no security headers — add CSP, HSTS, X-Content-Type-Options via middleware (e.g. unrolled/secure)",
       "Run gosec (SAST) and govulncheck (vulnerable deps) in CI; hash passwords with bcrypt (cost ≥ 12) or argon2id",
+    ],
+    "spring-boot": [
+      "Actuator: expose only health/info and bind the management port to an internal address — /heapdump and /env leak credentials",
+      "@PreAuthorize is silently inert without @EnableMethodSecurity — confirm it is present before trusting method-level checks",
+      "Request matchers are evaluated in order and the first match wins — specific rules first, ending with anyRequest().authenticated()",
+      "Use derived queries or bound @Query parameters — never concatenate input into EntityManager.createQuery or JdbcTemplate SQL",
+      "Disable CSRF only for stateless bearer-token APIs — never while a session cookie still authenticates the user",
+      "Bind requests to DTOs, never onto JPA entities — @ModelAttribute on an @Entity is mass assignment",
     ],
     terraform: [
       "Pin provider versions with ~> constraints, not latest",
