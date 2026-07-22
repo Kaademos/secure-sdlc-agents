@@ -108,6 +108,11 @@ Every pull request, including one opened from a fork, is checked automatically b
 matrix. CircleCI (`.circleci/config.yml`) covers pushes to `main` and release tags.
 If your PR is red, run `npm run ci` locally to reproduce it before pushing a fix.
 
+[`.github/workflows/dependency-audit.yml`](.github/workflows/dependency-audit.yml) runs
+`npm audit` on each PR and weekly, failing on high or critical advisories. Reproduce it
+with `npm audit --audit-level=high`. Prefer an `overrides` entry for a transitive
+dependency over adding a direct one the code does not import.
+
 Maintainers: see [RELEASING.md](RELEASING.md) for how to cut a release.
 
 ---
