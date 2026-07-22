@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.3.1] — 2026-07-22
+
+### Security
+- **`fast-uri` upgraded to 3.1.4** via an `overrides` entry, clearing two HIGH advisories in the transitive `@modelcontextprotocol/sdk → ajv → fast-uri` chain:
+  - [GHSA-4c8g-83qw-93j6](https://github.com/advisories/GHSA-4c8g-83qw-93j6) / CVE-2026-13676 — host confusion via failed IDN canonicalization (fixed in 3.1.3)
+  - [GHSA-v2hh-gcrm-f6hx](https://github.com/advisories/GHSA-v2hh-gcrm-f6hx) / CVE-2026-16221 — host confusion via literal backslash authority delimiter (fixed in 3.1.4)
+
+  Reported by @anupamme in #17, which targeted 3.1.3 and so would have left the second advisory open. `overrides` is used rather than a direct dependency because nothing in this codebase imports `fast-uri`; it also keeps the floor in place across future `npm update` runs. Note that `overrides` applies to this repository's own installs (CI, clones, development) — consumers of the published package resolve `fast-uri` through ajv's `^3.0.1` range, which already yields a patched version.
+
+### Notes
+- `@hono/node-server` (GHSA-frvp-7c67-39w9, moderate — `serve-static` path traversal on Windows) remains open and is **not reachable in this project**: the MCP server uses `StdioServerTransport` only and never imports hono or `serve-static`. Patching requires `>=2.0.5`, outside the `^1.19.9` range `@modelcontextprotocol/sdk` declares, so forcing it would risk breaking the SDK for no security benefit. Revisit when the SDK widens its range.
+
+---
+
 ## [1.3.0] — 2026-07-22
 
 ### Added
