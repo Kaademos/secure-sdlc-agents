@@ -336,6 +336,7 @@ Deep, framework-specific security guidance in `stacks/`:
 | Express.js | [`stacks/express.md`](stacks/express.md) — helmet, rate limiting, CSRF, Zod validation |
 | Ruby on Rails | [`stacks/rails.md`](stacks/rails.md) — Brakeman, Pundit, strong parameters, credentials |
 | Go (net/http, Gin, Echo, Fiber) | [`stacks/golang.md`](stacks/golang.md) — html/template XSS, database/sql & GORM injection, CORS, gosec/govulncheck |
+| Spring Boot (Java/Kotlin) | [`stacks/spring-boot.md`](stacks/spring-boot.md) — Actuator exposure, `@EnableMethodSecurity`, JPQL & SpEL injection, mass assignment |
 
 ---
 
@@ -439,7 +440,7 @@ please [open an issue](.github/ISSUE_TEMPLATE/guidance-correction.md).
 See [CONTRIBUTING.md](CONTRIBUTING.md). High-value contributions:
 
 - Additional compliance frameworks (HIPAA, FedRAMP, NIS2)
-- Stack profiles for Go (Gin/Echo), .NET, Java Spring Boot
+- Stack profiles for .NET, Rust, and Laravel
 - More worked examples (OAuth flows, payment processing, AI features)
 - Integration guides for specific SAST/DAST tools
 - Translations of agent prompts

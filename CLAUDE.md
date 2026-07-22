@@ -176,6 +176,7 @@ If the project uses one of these stacks, reference the relevant profile in `stac
 | Express.js | `stacks/express.md` |
 | Ruby on Rails | `stacks/rails.md` |
 | Go (net/http, Gin, Echo, Fiber) | `stacks/golang.md` |
+| Spring Boot (Java/Kotlin) | `stacks/spring-boot.md` |
 
 Stack profiles contain framework-specific vulnerability patterns, secure coding examples,
 and recommended libraries. Reference them when the dev-lead or appsec-engineer agents

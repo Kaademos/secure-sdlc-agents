@@ -16,7 +16,8 @@ suite enforces it):
 
 ```bash
 # bump the version in all manifests, then:
-npm test          # 13 tests; version-sync test fails if a manifest is out of step
+npm run ci        # tests + package-contents check; the version-sync test
+                  # fails if any manifest is out of step
 ```
 
 - Add a `## [X.Y.Z] — YYYY-MM-DD` section to [CHANGELOG.md](CHANGELOG.md).

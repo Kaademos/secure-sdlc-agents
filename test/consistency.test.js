@@ -17,7 +17,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const stacksDir = join(ROOT, "stacks");
 
 // Frameworks that ship BOTH a notes entry and a stacks/<name>.md profile.
-const PROFILED_FRAMEWORKS = ["nextjs", "express", "django", "fastapi", "rails", "golang"];
+const PROFILED_FRAMEWORKS = ["nextjs", "express", "django", "fastapi", "rails", "golang", "spring-boot"];
+
+// stacks/nodejs.md is a fallback pointer for "Node, framework unknown" rather than a
+// framework profile, so it intentionally has no dedicated notes entry.
+const FALLBACK_PROFILES = ["nodejs"];
 
 test("each profiled framework has at least 4 security notes", () => {
   for (const name of PROFILED_FRAMEWORKS) {
@@ -64,6 +68,24 @@ test("every stacks/*.md profile is non-empty and has an H1 title", () => {
   }
 });
 
+// Every profile we ship must have real notes — not the generic fallback. This is the
+// exact gap that let `spring-boot` be detectable with no guidance behind it.
+test("every shipped profile has stack-specific notes, not the generic fallback", () => {
+  const generic = getStackSecurityNotes("a-stack-that-does-not-exist");
+  const shipped = readdirSync(stacksDir)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => f.replace(/\.md$/, ""))
+    .filter((name) => !FALLBACK_PROFILES.includes(name));
+
+  for (const name of shipped) {
+    assert.notDeepEqual(
+      getStackSecurityNotes(name),
+      generic,
+      `stacks/${name}.md ships but getStackSecurityNotes("${name}") returns the generic fallback`
+    );
+  }
+});
+
 test("detectStack identifies frameworks from manifest files", () => {
   const cases = [
     { files: { "package.json": JSON.stringify({ dependencies: { next: "14" } }) }, expect: "nextjs" },
@@ -72,6 +94,13 @@ test("detectStack identifies frameworks from manifest files", () => {
     { files: { "go.mod": "module x\n" }, expect: "golang" },
     { files: { "requirements.txt": "fastapi==0.110" }, expect: "fastapi" },
     { files: { "Gemfile": "gem 'rails'" }, expect: "rails" },
+    // Maven names the starter artifact; Gradle applies the org.springframework.boot plugin.
+    { files: { "pom.xml": "<artifactId>spring-boot-starter-web</artifactId>" }, expect: "spring-boot" },
+    { files: { "build.gradle": "plugins { id 'org.springframework.boot' version '3.2.0' }" }, expect: "spring-boot" },
+    { files: { "build.gradle.kts": `plugins { id("org.springframework.boot") version "3.2.0" }` }, expect: "spring-boot" },
+    // Plain JVM projects must NOT inherit the Spring Boot profile.
+    { files: { "pom.xml": "<artifactId>plain-java-app</artifactId>" }, expect: "java" },
+    { files: { "build.gradle.kts": `plugins { kotlin("jvm") version "1.9.0" }` }, expect: "java" },
   ];
   for (const { files, expect } of cases) {
     const dir = mkdtempSync(join(tmpdir(), "stackdetect-"));

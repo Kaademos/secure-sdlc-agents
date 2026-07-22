@@ -1,0 +1,62 @@
+name: PR Checks
+
+# Repository CI for pull requests, including those from forks.
+#
+# WHY THIS EXISTS ALONGSIDE CIRCLECI:
+# .circleci/config.yml is the primary CI for pushes and release tags. CircleCI does
+# not build pull requests from forks unless "Build forked pull requests" is enabled
+# in Project Settings → Advanced, so fork PRs previously reported zero checks and a
+# broken contribution could look green. GitHub Actions runs fork PRs out of the box
+# with a read-only token and no secrets, so this workflow guarantees every PR is
+# validated regardless of project settings.
+#
+# This runs the SAME commands as CircleCI (`npm test`, `npm run test:pack`) on the
+# same Node matrix — keep the two in sync.
+#
+# NOTE: this is repository CI. It is NOT shipped to end users — package.json `files`
+# includes only .github/workflows/secure-sdlc-gate.yml, which is the product template.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+# Least privilege: the suite only needs to read the checked-out tree.
+permissions:
+  contents: read
+
+# A new push to a PR cancels the superseded run.
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["18", "20", "22"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node ${{ matrix.node-version }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Verify npm package contents
+        run: npm run test:pack
