@@ -49,7 +49,48 @@ export default async function init(options) {
     spinner2.succeed(`${copied} templates copied to docs/`);
   }
 
-  // 3. Create secure-sdlc.yaml config
+  // 3. Copy Claude Code agent definitions + CLAUDE.md
+  // Without this, "claude --agent product-manager ..." — the very next step this
+  // command prints below — silently falls back to a generic Claude session instead
+  // of the specialised persona. Claude Code does not error on an unrecognised
+  // --agent name, so a missing .claude/agents/ here is an invisible failure mode,
+  // not a loud one.
+  if (!options.skipAgents) {
+    const agentsSrcDir = join(REPO_ROOT, ".claude", "agents");
+    const agentsDestDir = join(projectRoot, ".claude", "agents");
+
+    if (existsSync(agentsSrcDir)) {
+      const spinnerAgents = ora("Installing Claude Code agent definitions").start();
+      try {
+        mkdirSync(agentsDestDir, { recursive: true });
+        let copiedAgents = 0;
+        for (const file of readdirSync(agentsSrcDir)) {
+          const dest = join(agentsDestDir, file);
+          if (!existsSync(dest)) {
+            copyFileSync(join(agentsSrcDir, file), dest);
+            copiedAgents++;
+          }
+        }
+
+        const claudeMdSrc = join(REPO_ROOT, "CLAUDE.md");
+        const claudeMdDest = join(projectRoot, "CLAUDE.md");
+        let copiedClaudeMd = false;
+        if (existsSync(claudeMdSrc) && !existsSync(claudeMdDest)) {
+          copyFileSync(claudeMdSrc, claudeMdDest);
+          copiedClaudeMd = true;
+        }
+
+        spinnerAgents.succeed(
+          `${copiedAgents} agent definitions copied to .claude/agents/` +
+            (copiedClaudeMd ? " (+ CLAUDE.md)" : "")
+        );
+      } catch (err) {
+        spinnerAgents.warn(`Could not install agent definitions: ${err.message}`);
+      }
+    }
+  }
+
+  // 4. Create secure-sdlc.yaml config
   const configPath = join(projectRoot, "secure-sdlc.yaml");
   if (!existsSync(configPath)) {
     const spinner3 = ora("Creating secure-sdlc.yaml config").start();
@@ -60,7 +101,7 @@ export default async function init(options) {
     printInfo("secure-sdlc.yaml already exists — skipping");
   }
 
-  // 4. Install git hooks
+  // 5. Install git hooks
   if (!options.skipHooks) {
     const hooksDir = join(projectRoot, ".git", "hooks");
     if (existsSync(join(projectRoot, ".git"))) {
@@ -87,7 +128,7 @@ export default async function init(options) {
     }
   }
 
-  // 5. Generate GitHub Actions workflow
+  // 6. Generate GitHub Actions workflow
   if (!options.skipCi) {
     const workflowsDir = join(projectRoot, ".github", "workflows");
     const workflowPath = join(workflowsDir, "secure-sdlc-gate.yml");
@@ -111,7 +152,7 @@ export default async function init(options) {
     }
   }
 
-  // 6. Cursor MCP setup
+  // 7. Cursor MCP setup
   if (options.cursor) {
     const spinner6 = ora("Configuring Cursor MCP integration").start();
     try {

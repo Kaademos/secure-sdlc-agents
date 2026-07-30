@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A team of 8 AI security specialists embedded in your coding workflow — covering every phase of the Secure SDLC from requirements to release gating.",
-    "version": "1.3.1"
+    "version": "1.3.2"
   },
   "plugins": [
     {
@@ -16,7 +16,7 @@
         "repo": "Kaademos/secure-sdlc-agents"
       },
       "description": "8 AI security specialist agents for the full Secure SDLC: threat modelling, AppSec, GRC, IaC review, AI/LLM security, and release gating. Works with Claude Code, Cursor, Windsurf, and any MCP-compatible tool.",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "author": {
         "name": "Kaademos"
       },

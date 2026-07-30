@@ -25,6 +25,21 @@ print_pass() { echo -e "  ${GREEN}✓${NC} $1"; }
 print_warn() { echo -e "  ${YELLOW}⚠${NC}  $1"; }
 print_fail() { echo -e "  ${RED}✗${NC} $1"; }
 
+# Mirrors the blank-template heuristic in cli/src/commands/gate.js. A file
+# existing is not the same as the artefact being filled in — without this, an
+# untouched template satisfies the gate below just as well as a real doc.
+is_blank_template() {
+  local file="$1"
+  grep -q '\[Feature Name\]' "$file" 2>/dev/null && return 0
+  grep -q '\[YYYY-MM-DD\]' "$file" 2>/dev/null && return 0
+  if grep -q '\[Brief description' "$file" 2>/dev/null; then
+    local size
+    size=$(wc -c < "$file" 2>/dev/null || echo 0)
+    [ "$size" -lt 2000 ] && return 0
+  fi
+  return 1
+}
+
 # Read the push destination
 while read local_ref local_sha remote_ref remote_sha; do
   REMOTE_BRANCH="${remote_ref##refs/heads/}"
@@ -48,26 +63,30 @@ while read local_ref local_sha remote_ref remote_sha; do
     # Plan artefacts — required for any push to protected branches
     for f in "docs/security-requirements.md" "docs/risk-register.md"; do
       if [ ! -f "$f" ]; then
-        WARNINGS+=("$f")
+        WARNINGS+=("$f is missing")
+      elif is_blank_template "$f"; then
+        WARNINGS+=("$f is still the blank template — not filled in")
       else
         print_pass "$f"
       fi
     done
-    
+
     # Stricter check for main/master
     if [[ "$REMOTE_BRANCH" =~ ^(main|master)$ ]]; then
       for f in "docs/threat-model.md" "docs/sast-findings.md"; do
         if [ ! -f "$f" ]; then
-          MISSING+=("$f")
+          MISSING+=("$f is missing")
+        elif is_blank_template "$f"; then
+          MISSING+=("$f is still the blank template — not filled in")
         else
           print_pass "$f"
         fi
       done
     fi
-    
+
     if [ ${#MISSING[@]} -gt 0 ]; then
       echo ""
-      print_fail "Missing required security artefacts for push to $REMOTE_BRANCH:"
+      print_fail "Required security artefacts are missing or unfilled for push to $REMOTE_BRANCH:"
       for m in "${MISSING[@]}"; do
         echo "      ✗ $m"
       done
@@ -78,10 +97,10 @@ while read local_ref local_sha remote_ref remote_sha; do
       echo ""
       exit 1
     fi
-    
+
     if [ ${#WARNINGS[@]} -gt 0 ]; then
       for w in "${WARNINGS[@]}"; do
-        print_warn "$w is missing — run 'secure-sdlc kickoff' to generate it"
+        print_warn "$w — run 'secure-sdlc kickoff' to generate it"
       done
     fi
   fi
@@ -96,8 +115,12 @@ while read local_ref local_sha remote_ref remote_sha; do
     
     for doc in "docs/sast-findings.md" "docs/test-security-report.md"; do
       if [ -f "$doc" ]; then
-        COUNT=$(grep -icE 'CRITICAL' "$doc" 2>/dev/null | tr -d ' ' || echo "0")
-        RESOLVED=$(grep -icE 'resolved|mitigated|false positive|closed' "$doc" 2>/dev/null | tr -d ' ' || echo "0")
+        # `grep -c` already prints "0" on no match, but still exits 1 — under
+        # `pipefail` that made the `|| echo "0"` fallback ALSO fire, doubling the
+        # value onto two lines (e.g. "0\n0") and breaking the arithmetic below.
+        # Neutralise grep's exit status before it reaches the pipe instead.
+        COUNT=$( { grep -icE 'CRITICAL' "$doc" 2>/dev/null || true; } | tr -d ' ' )
+        RESOLVED=$( { grep -icE 'resolved|mitigated|false positive|closed' "$doc" 2>/dev/null || true; } | tr -d ' ' )
         UNRESOLVED=$(( COUNT - RESOLVED ))
         
         if [ "$UNRESOLVED" -gt 0 ]; then

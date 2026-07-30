@@ -24,6 +24,12 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTS_DIR = join(__dirname, "../../.claude/agents");
 const TEMPLATES_DIR = join(__dirname, "../../docs/templates");
+// Read from mcp/package.json rather than hardcoding, so serverInfo.version can't
+// silently drift from the manifest that actually declares it (mcp/package.json
+// is versioned independently from the root CLI package — see RELEASING.md).
+const { version: SERVER_VERSION } = JSON.parse(
+  readFileSync(join(__dirname, "../package.json"), "utf-8")
+);
 
 function readAgentPrompt(agentName) {
   const path = join(AGENTS_DIR, `${agentName}.md`);
@@ -609,7 +615,7 @@ function handleAISecurityReview(args) {
 // ──────────────────────────────────────────────────────────────────────────────
 
 const server = new Server(
-  { name: "secure-sdlc", version: "1.0.0" },
+  { name: "secure-sdlc", version: SERVER_VERSION },
   { capabilities: { tools: {} } }
 );
 

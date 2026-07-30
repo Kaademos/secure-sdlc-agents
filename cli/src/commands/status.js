@@ -6,7 +6,7 @@ import { detectStack } from "../utils/stack-detect.js";
 
 const PHASES = ["PLAN", "DESIGN", "BUILD", "TEST", "RELEASE"];
 
-const PHASE_ARTEFACTS = {
+export const PHASE_ARTEFACTS = {
   PLAN:    ["docs/security-requirements.md", "docs/risk-register.md"],
   DESIGN:  ["docs/threat-model.md", "docs/infra-security-review.md"],
   BUILD:   ["docs/sast-findings.md"],
