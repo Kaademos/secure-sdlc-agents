@@ -29,6 +29,7 @@ program
   .option("-s, --stack <stack>", "Technology stack (e.g. 'nextjs', 'django', 'fastapi')")
   .option("--skip-hooks", "Skip installing git hooks")
   .option("--skip-ci", "Skip generating GitHub Actions workflow")
+  .option("--skip-agents", "Skip copying .claude/agents/ and CLAUDE.md into the project")
   .option("--cursor", "Generate Cursor MCP config and rules")
   .action(async (options) => {
     const run = await loadCommand("init");

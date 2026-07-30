@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from "fs";
-import { join, homedir } from "path";
+import { join } from "path";
+import { homedir } from "os";
 import chalk from "chalk";
 import { printBanner, printSuccess, printWarn } from "../utils/banner.js";
 import { getMcpServerPath } from "../utils/package-root.js";

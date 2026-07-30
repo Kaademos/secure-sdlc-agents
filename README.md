@@ -366,7 +366,7 @@ In `warp-workflows/` — import into Warp for one-click SDLC automation:
 | `infra-security-review.md` | cloud-platform-engineer | Design |
 | `sast-findings.md` | appsec-engineer + dev-lead | Build |
 | `test-security-report.md` | appsec-engineer | Test |
-| `release-sign-off.md` | release-manager | Release |
+| `release-security-sign-off.md` | release-manager | Release |
 | `compliance-attestation.md` | grc-analyst | Release |
 
 ---
